@@ -80,4 +80,8 @@ impl okf::Kernel for Kernel {
         cred: *mut Self::Ucred,
         td: *mut Self::Thread,
     ) -> c_int;
+
+    #[offset(0x264620)]
+    unsafe fn solisten(self, so: *mut Self::Socket, backlog: c_int, td: *mut Self::Thread)
+        -> c_int;
 }

@@ -99,6 +99,12 @@ pub trait Kernel: MappedKernel {
         cred: *mut Self::Ucred,
         td: *mut Self::Thread,
     ) -> c_int;
+
+    /// # Safety
+    /// - `so` cannot be null.
+    /// - `td` cannot be null.
+    unsafe fn solisten(self, so: *mut Self::Socket, backlog: c_int, td: *mut Self::Thread)
+        -> c_int;
 }
 
 /// Provides wrapper methods for methods on [`Kernel`].
