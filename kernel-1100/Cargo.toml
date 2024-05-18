@@ -1,0 +1,8 @@
+[package]
+name = "okf-1100"
+version = "0.1.0"
+edition = "2021"
+links = "orbiskernel"
+
+[dependencies]
+okf = { version = "0.1.0", path = "../" }

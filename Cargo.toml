@@ -1,0 +1,13 @@
+[package]
+name = "okf"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+okf-macros = { version = "0.1.0", path = "macros" }
+
+[workspace]
+members = [
+    "kernel-1100",
+    "macros"
+]
