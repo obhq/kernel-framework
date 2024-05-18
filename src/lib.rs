@@ -1,16 +1,19 @@
 #![no_std]
 
 use self::file::{File, OwnedFile};
+use self::socket::Socket;
 use self::thread::Thread;
+use self::ucred::Ucred;
 use self::uio::{Uio, UioSeg};
 use core::ffi::{c_char, c_int};
 use core::num::NonZeroI32;
 use core::ptr::null_mut;
-
 pub use okf_macros::*;
 
 pub mod file;
+pub mod socket;
 pub mod thread;
+pub mod ucred;
 pub mod uio;
 
 /// Provides methods to access the PS4 kernel for a specific version.
@@ -20,7 +23,9 @@ pub mod uio;
 /// that implement [`Kernel`].
 pub trait Kernel: MappedKernel {
     type File: File;
+    type Socket: Socket;
     type Thread: Thread;
+    type Ucred: Ucred;
     type Uio: Uio<Self>;
 
     /// # Safety
@@ -65,6 +70,20 @@ pub trait Kernel: MappedKernel {
     /// - `td` cannot be null.
     /// - `auio` cannot be null.
     unsafe fn kern_writev(self, td: *mut Self::Thread, fd: c_int, auio: *mut Self::Uio) -> c_int;
+
+    /// # Safety
+    /// - `aso` cannot be null.
+    /// - `cred` cannot be null.
+    /// - `td` cannot be null.
+    unsafe fn socreate(
+        self,
+        dom: c_int,
+        aso: *mut *mut Self::Socket,
+        ty: c_int,
+        proto: c_int,
+        cred: *mut Self::Ucred,
+        td: *mut Self::Thread,
+    ) -> c_int;
 }
 
 /// Provides wrapper methods for methods on [`Kernel`].
