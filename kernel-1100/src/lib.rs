@@ -58,6 +58,9 @@ impl okf::Kernel for Kernel {
     #[offset(0xDD340)]
     unsafe fn kern_writev(self, td: *mut Self::Thread, fd: c_int, auio: *mut Self::Uio) -> c_int;
 
+    #[offset(0x264680)]
+    unsafe fn soclose(self, so: *mut Self::Socket) -> c_int;
+
     #[offset(0x263890)]
     unsafe fn socreate(
         self,

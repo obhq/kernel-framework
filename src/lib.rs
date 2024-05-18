@@ -72,6 +72,10 @@ pub trait Kernel: MappedKernel {
     unsafe fn kern_writev(self, td: *mut Self::Thread, fd: c_int, auio: *mut Self::Uio) -> c_int;
 
     /// # Safety
+    /// `so` cannot be null.
+    unsafe fn soclose(self, so: *mut Self::Socket) -> c_int;
+
+    /// # Safety
     /// - `aso` cannot be null.
     /// - `cred` cannot be null.
     /// - `td` cannot be null.
