@@ -23,3 +23,11 @@ impl<K: Kernel> Drop for OwnedSocket<K> {
         unsafe { self.kernel.soclose(self.sock) };
     }
 }
+
+/// Represents `sockaddr` structure.
+#[repr(C)]
+pub struct SockAddr {
+    pub sa_len: u8,
+    pub sa_family: u8,
+    pub sa_data: [u8; 14],
+}

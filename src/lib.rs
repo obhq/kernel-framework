@@ -1,7 +1,7 @@
 #![no_std]
 
 use self::file::{File, OwnedFile};
-use self::socket::Socket;
+use self::socket::{SockAddr, Socket};
 use self::thread::Thread;
 use self::ucred::Ucred;
 use self::uio::{Uio, UioSeg};
@@ -70,6 +70,17 @@ pub trait Kernel: MappedKernel {
     /// - `td` cannot be null.
     /// - `auio` cannot be null.
     unsafe fn kern_writev(self, td: *mut Self::Thread, fd: c_int, auio: *mut Self::Uio) -> c_int;
+
+    /// # Safety
+    /// - `so` cannot be null.
+    /// - `nam` cannot be null.
+    /// - `td` cannot be null.
+    unsafe fn sobind(
+        self,
+        so: *mut Self::Socket,
+        nam: *mut SockAddr,
+        td: *mut Self::Thread,
+    ) -> c_int;
 
     /// # Safety
     /// `so` cannot be null.

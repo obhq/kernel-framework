@@ -6,6 +6,7 @@ use self::thread::Thread;
 use self::ucred::Ucred;
 use self::uio::Uio;
 use core::ffi::{c_char, c_int};
+use okf::socket::SockAddr;
 use okf::uio::UioSeg;
 use okf::{offset, MappedKernel};
 
@@ -57,6 +58,14 @@ impl okf::Kernel for Kernel {
 
     #[offset(0xDD340)]
     unsafe fn kern_writev(self, td: *mut Self::Thread, fd: c_int, auio: *mut Self::Uio) -> c_int;
+
+    #[offset(0x264600)]
+    unsafe fn sobind(
+        self,
+        so: *mut Self::Socket,
+        nam: *mut SockAddr,
+        td: *mut Self::Thread,
+    ) -> c_int;
 
     #[offset(0x264680)]
     unsafe fn soclose(self, so: *mut Self::Socket) -> c_int;
