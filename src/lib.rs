@@ -71,17 +71,27 @@ pub trait Kernel: MappedKernel {
 ///
 /// This trait is automatically implemented for any type that implement [`Kernel`].
 pub trait KernelExt: Kernel {
-    fn fget_write(self, td: *mut Self::Thread, fd: c_int) -> Result<OwnedFile<Self>, NonZeroI32>;
+    /// # Safety
+    /// `td` should not be null although the PS4 does not use it currently.
+    unsafe fn fget_write(
+        self,
+        td: *mut Self::Thread,
+        fd: c_int,
+    ) -> Result<OwnedFile<Self>, NonZeroI32>;
 }
 
 impl<T: Kernel> KernelExt for T {
-    fn fget_write(self, td: *mut Self::Thread, fd: c_int) -> Result<OwnedFile<Self>, NonZeroI32> {
+    unsafe fn fget_write(
+        self,
+        td: *mut Self::Thread,
+        fd: c_int,
+    ) -> Result<OwnedFile<Self>, NonZeroI32> {
         let mut fp = null_mut();
-        let errno = unsafe { self.fget_write(td, fd, 0, &mut fp) };
+        let errno = self.fget_write(td, fd, 0, &mut fp);
 
         match NonZeroI32::new(errno) {
             Some(v) => Err(v),
-            None => Ok(unsafe { OwnedFile::new(self, fp) }),
+            None => Ok(OwnedFile::new(self, fp)),
         }
     }
 }
