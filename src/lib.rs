@@ -1,7 +1,7 @@
 #![no_std]
 
 use self::file::{File, OwnedFile};
-use self::malloc::Malloc;
+use self::malloc::{Malloc, MallocFlags};
 use self::socket::{SockAddr, Socket};
 use self::thread::Thread;
 use self::ucred::Ucred;
@@ -59,6 +59,13 @@ pub trait Kernel: MappedKernel {
     unsafe fn fdrop(self, fp: *mut Self::File, td: *mut Self::Thread) -> c_int;
 
     /// # Safety
+    /// `ty` cannot be null.
+    ///
+    /// # Panics
+    /// If `addr` is not valid.
+    unsafe fn free(self, addr: *mut u8, ty: *mut Self::Malloc);
+
+    /// # Safety
     /// - `td` cannot be null.
     /// - `path` cannot be null and must point to a null-terminated string if `seg` is [`UioSeg::Kernel`].
     unsafe fn kern_openat(
@@ -83,6 +90,10 @@ pub trait Kernel: MappedKernel {
     /// - `td` cannot be null.
     /// - `auio` cannot be null.
     unsafe fn kern_writev(self, td: *mut Self::Thread, fd: c_int, auio: *mut Self::Uio) -> c_int;
+
+    /// # Safety
+    /// `ty` cannot be null.
+    unsafe fn malloc(self, size: usize, ty: *mut Self::Malloc, flags: MallocFlags) -> *mut u8;
 
     /// # Safety
     /// - `so` cannot be null.

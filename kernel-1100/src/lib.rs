@@ -7,6 +7,7 @@ use self::thread::Thread;
 use self::ucred::Ucred;
 use self::uio::Uio;
 use core::ffi::{c_char, c_int};
+use okf::malloc::MallocFlags;
 use okf::socket::SockAddr;
 use okf::uio::UioSeg;
 use okf::{offset, MappedKernel, StaticMut};
@@ -45,6 +46,9 @@ impl okf::Kernel for Kernel {
     #[offset(0x4161B0)]
     unsafe fn fdrop(self, fp: *mut Self::File, td: *mut Self::Thread) -> c_int;
 
+    #[offset(0x1A43E0)]
+    unsafe fn free(self, addr: *mut u8, ty: *mut Self::Malloc);
+
     #[offset(0xE63B0)]
     unsafe fn kern_openat(
         self,
@@ -64,6 +68,9 @@ impl okf::Kernel for Kernel {
 
     #[offset(0xDD340)]
     unsafe fn kern_writev(self, td: *mut Self::Thread, fd: c_int, auio: *mut Self::Uio) -> c_int;
+
+    #[offset(0x1A4220)]
+    unsafe fn malloc(self, size: usize, ty: *mut Self::Malloc, flags: MallocFlags) -> *mut u8;
 
     #[offset(0x264600)]
     unsafe fn sobind(
