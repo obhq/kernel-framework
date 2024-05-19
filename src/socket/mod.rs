@@ -1,4 +1,13 @@
+pub use self::inet::*;
 use crate::Kernel;
+use core::ffi::c_int;
+
+mod inet;
+
+pub const AF_INET: c_int = 2;
+
+pub const SOCK_STREAM: c_int = 1;
+pub const SOCK_DGRAM: c_int = 2;
 
 /// Represents `socket` structure.
 pub trait Socket: Sized {}
