@@ -98,6 +98,11 @@ pub trait Kernel: MappedKernel {
     /// # Safety
     /// - `so` cannot be null.
     /// - `nam` cannot be null.
+    unsafe fn soaccept(self, so: *mut Self::Socket, nam: *mut *mut SockAddr) -> c_int;
+
+    /// # Safety
+    /// - `so` cannot be null.
+    /// - `nam` cannot be null.
     /// - `td` cannot be null.
     unsafe fn sobind(
         self,

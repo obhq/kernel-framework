@@ -72,6 +72,9 @@ impl okf::Kernel for Kernel {
     #[offset(0x1A4220)]
     unsafe fn malloc(self, size: usize, ty: *mut Self::Malloc, flags: MallocFlags) -> *mut u8;
 
+    #[offset(0x264AF0)]
+    unsafe fn soaccept(self, so: *mut Self::Socket, nam: *mut *mut SockAddr) -> c_int;
+
     #[offset(0x264600)]
     unsafe fn sobind(
         self,
