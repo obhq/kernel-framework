@@ -20,7 +20,7 @@ pub trait KernelExt: Kernel {
     /// # Safety
     /// - `cred` cannot be null.
     /// - `td` cannot be null.
-    unsafe fn socreate(
+    unsafe fn create_socket(
         self,
         dom: c_int,
         ty: c_int,
@@ -45,7 +45,7 @@ impl<T: Kernel> KernelExt for T {
         }
     }
 
-    unsafe fn socreate(
+    unsafe fn create_socket(
         self,
         dom: c_int,
         ty: c_int,
