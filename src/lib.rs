@@ -1,6 +1,6 @@
 #![no_std]
 
-use self::file::{File, OwnedFile};
+use self::file::File;
 use self::malloc::{Malloc, MallocFlags};
 use self::socket::{SockAddr, Socket};
 use self::thread::Thread;
@@ -8,11 +8,10 @@ use self::ucred::Ucred;
 use self::uio::{Uio, UioSeg};
 use core::ffi::{c_char, c_int};
 use core::marker::PhantomData;
-use core::num::NonZeroI32;
 use core::ops::Deref;
-use core::ptr::null_mut;
 pub use okf_macros::*;
 
+pub mod ext;
 pub mod file;
 pub mod malloc;
 pub mod socket;
@@ -22,9 +21,9 @@ pub mod uio;
 
 /// Provides methods to access the PS4 kernel for a specific version.
 ///
-/// Most methods here are a direct call to the kernel so most of them are unsafe. A safe wrapper for
-/// those methods are provides by [`KernelExt`], which is automatically implemented for any type
-/// that implement [`Kernel`].
+/// Most methods here are a direct call to the kernel so most of them are unsafe. Some safe wrapper
+/// for those methods are provides by [`self::ext::KernelExt`], which is automatically implemented
+/// for any type that implement [`Kernel`].
 pub trait Kernel: MappedKernel {
     const M_TEMP: StaticMut<Self::Malloc>;
 
@@ -134,35 +133,6 @@ pub trait Kernel: MappedKernel {
     /// - `td` cannot be null.
     unsafe fn solisten(self, so: *mut Self::Socket, backlog: c_int, td: *mut Self::Thread)
         -> c_int;
-}
-
-/// Provides wrapper methods for methods on [`Kernel`].
-///
-/// This trait is automatically implemented for any type that implement [`Kernel`].
-pub trait KernelExt: Kernel {
-    /// # Safety
-    /// `td` should not be null although the PS4 does not use it currently.
-    unsafe fn fget_write(
-        self,
-        td: *mut Self::Thread,
-        fd: c_int,
-    ) -> Result<OwnedFile<Self>, NonZeroI32>;
-}
-
-impl<T: Kernel> KernelExt for T {
-    unsafe fn fget_write(
-        self,
-        td: *mut Self::Thread,
-        fd: c_int,
-    ) -> Result<OwnedFile<Self>, NonZeroI32> {
-        let mut fp = null_mut();
-        let errno = self.fget_write(td, fd, 0, &mut fp);
-
-        match NonZeroI32::new(errno) {
-            Some(v) => Err(v),
-            None => Ok(OwnedFile::new(self, fp)),
-        }
-    }
 }
 
 /// Mapped PS4 kernel in the memory.
