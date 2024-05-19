@@ -30,7 +30,7 @@ pub trait Kernel: MappedKernel {
     type File: File;
     type Malloc: Malloc;
     type Socket: Socket;
-    type Thread: Thread;
+    type Thread: Thread<Self>;
     type Ucred: Ucred;
     type Uio: Uio<Self>;
 

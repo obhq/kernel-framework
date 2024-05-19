@@ -1,7 +1,8 @@
+use crate::Kernel;
 use core::arch::asm;
 
 /// Represents `thread` structure.
-pub trait Thread: Sized {
+pub trait Thread<K: Kernel>: Sized {
     fn current() -> *mut Self {
         let mut p;
 
@@ -11,6 +12,9 @@ pub trait Thread: Sized {
 
         p
     }
+
+    /// Returns value of `td_ucred`.
+    fn cred(&self) -> *mut K::Ucred;
 
     /// Returns value of `td_retval[i]`.
     ///
