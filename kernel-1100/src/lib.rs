@@ -1,6 +1,7 @@
 #![no_std]
 
 use self::file::File;
+use self::malloc::Malloc;
 use self::socket::Socket;
 use self::thread::Thread;
 use self::ucred::Ucred;
@@ -8,9 +9,10 @@ use self::uio::Uio;
 use core::ffi::{c_char, c_int};
 use okf::socket::SockAddr;
 use okf::uio::UioSeg;
-use okf::{offset, MappedKernel};
+use okf::{offset, MappedKernel, StaticMut};
 
 mod file;
+mod malloc;
 mod socket;
 mod thread;
 mod ucred;
@@ -21,7 +23,11 @@ mod uio;
 pub struct Kernel(&'static [u8]);
 
 impl okf::Kernel for Kernel {
+    #[offset(0x15415B0)]
+    const M_TEMP: StaticMut<Self::Malloc>;
+
     type File = File;
+    type Malloc = Malloc;
     type Socket = Socket;
     type Thread = Thread;
     type Ucred = Ucred;

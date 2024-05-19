@@ -1,5 +1,5 @@
 use proc_macro::TokenStream;
-use syn::{parse_macro_input, Error, ItemStruct, LitInt};
+use syn::{parse_macro_input, Error, ItemStruct, LitInt, TraitItem};
 
 mod derive;
 mod offset;
@@ -16,7 +16,7 @@ pub fn derive_mapped_kernel(item: TokenStream) -> TokenStream {
 #[proc_macro_attribute]
 pub fn offset(args: TokenStream, item: TokenStream) -> TokenStream {
     let args = parse_macro_input!(args as LitInt);
-    let item = parse_macro_input!(item as self::offset::OffsetItem);
+    let item = parse_macro_input!(item as TraitItem);
 
     self::offset::transform(args, item)
         .unwrap_or_else(Error::into_compile_error)

@@ -1,79 +1,64 @@
 use proc_macro2::TokenStream;
-use quote::quote;
-use syn::parse::{Parse, ParseStream};
+use quote::ToTokens;
 use syn::punctuated::Punctuated;
-use syn::{parenthesized, Error, Ident, LitInt, Pat, PatType, Receiver, ReturnType, Token};
+use syn::{
+    parse_quote, Error, FnArg, LitInt, Pat, PatType, Token, TraitItem, TraitItemConst, TraitItemFn,
+};
 
-pub fn transform(args: LitInt, item: OffsetItem) -> syn::Result<TokenStream> {
+pub fn transform(args: LitInt, item: TraitItem) -> syn::Result<TokenStream> {
     match item {
-        OffsetItem::Method(v) => transform_method(args, v),
+        TraitItem::Const(i) => transform_const(args, i),
+        TraitItem::Fn(i) => transform_fn(args, i),
+        v => Err(Error::new_spanned(v, "unsupported offset item")),
     }
 }
 
-fn transform_method(args: LitInt, item: Method) -> syn::Result<TokenStream> {
-    // Assemble.
+fn transform_const(args: LitInt, mut item: TraitItemConst) -> syn::Result<TokenStream> {
+    // Check if body present.
+    if let Some((b, _)) = item.default {
+        return Err(Error::new_spanned(b, "expect `;`"));
+    }
+
+    // Set body.
     let offset: usize = args.base10_parse()?;
-    let unsafety = item.unsafety;
-    let ident = item.ident;
-    let receiver = item.receiver;
-    let params = item.params;
-    let ret = item.ret;
-    let args: Punctuated<&Pat, Token![,]> = params.iter().map(|p| p.pat.as_ref()).collect();
+    let ty = &item.ty;
 
-    Ok(quote! {
-        #unsafety fn #ident(#receiver, #params) #ret {
-            let _addr = unsafe { self.mapped().as_ptr().add(#offset) };
-            let _fp: unsafe extern "C" fn(#params) #ret = unsafe { core::mem::transmute(_addr) };
-            unsafe { _fp(#args) }
-        }
-    })
+    item.default = Some((
+        parse_quote!(=),
+        parse_quote!(unsafe { <#ty>::new(#offset) }),
+    ));
+
+    Ok(item.into_token_stream())
 }
 
-/// Item of `offset` attribute.
-pub enum OffsetItem {
-    Method(Method),
-}
+fn transform_fn(args: LitInt, mut item: TraitItemFn) -> syn::Result<TokenStream> {
+    // Check if body present.
+    if let Some(b) = item.default {
+        return Err(Error::new_spanned(b, "expect `;`"));
+    }
 
-impl Parse for OffsetItem {
-    fn parse(input: ParseStream) -> syn::Result<Self> {
-        let unsafety = input.parse()?;
-        let item = if input.parse::<Option<Token![fn]>>()?.is_some() {
-            // Parse name.
-            let ident = input.parse()?;
-            let params;
+    // Set body.
+    let offset: usize = args.base10_parse()?;
+    let sig = &item.sig;
+    let ret = &sig.output;
+    let mut params = Punctuated::<&PatType, Token![,]>::new();
+    let mut args = Punctuated::<&Pat, Token![,]>::new();
 
-            parenthesized!(params in input);
-
-            // Parse receiver.
-            let receiver = params.parse()?;
-
-            params.parse::<Option<Token![,]>>()?;
-
-            // Parse return type.
-            let ret = input.parse()?;
-
-            input.parse::<Token![;]>()?;
-
-            Self::Method(Method {
-                unsafety,
-                ident,
-                receiver,
-                params: params.parse_terminated(PatType::parse, Token![,])?,
-                ret,
-            })
-        } else {
-            return Err(Error::new(input.span(), "unsupported offset item"));
+    for p in sig.inputs.iter().skip(1) {
+        let p = match p {
+            FnArg::Receiver(_) => unreachable!(),
+            FnArg::Typed(v) => v,
         };
 
-        Ok(item)
+        params.push(p);
+        args.push(&p.pat);
     }
-}
 
-/// A method that have `offset` attribute.
-pub struct Method {
-    unsafety: Option<Token![unsafe]>,
-    ident: Ident,
-    receiver: Receiver,
-    params: Punctuated<PatType, Token![,]>,
-    ret: ReturnType,
+    item.default = Some(parse_quote!({
+        let _addr = unsafe { self.mapped().as_ptr().add(#offset) };
+        let _fp: unsafe extern "C" fn(#params) #ret = unsafe { core::mem::transmute(_addr) };
+        unsafe { _fp(#args) }
+    }));
+
+    Ok(item.into_token_stream())
 }
