@@ -37,6 +37,16 @@ pub trait KernelExt: Kernel {
         nam: &mut SockAddr,
         td: *mut Self::Thread,
     ) -> Result<(), NonZeroI32>;
+
+    /// # Safety
+    /// - `so` cannot be null.
+    /// - `td` cannot be null.
+    unsafe fn listen(
+        self,
+        so: *mut Self::Socket,
+        backlog: c_int,
+        td: *mut Self::Thread,
+    ) -> Result<(), NonZeroI32>;
 }
 
 impl<T: Kernel> KernelExt for T {
@@ -78,6 +88,20 @@ impl<T: Kernel> KernelExt for T {
         td: *mut Self::Thread,
     ) -> Result<(), NonZeroI32> {
         let errno = self.sobind(so, nam, td);
+
+        match NonZeroI32::new(errno) {
+            Some(v) => Err(v),
+            None => Ok(()),
+        }
+    }
+
+    unsafe fn listen(
+        self,
+        so: *mut Self::Socket,
+        backlog: c_int,
+        td: *mut Self::Thread,
+    ) -> Result<(), NonZeroI32> {
+        let errno = self.solisten(so, backlog, td);
 
         match NonZeroI32::new(errno) {
             Some(v) => Err(v),
