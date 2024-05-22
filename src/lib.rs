@@ -35,7 +35,7 @@ pub trait Kernel: MappedKernel {
     type Uio: Uio<Self>;
 
     fn var<O: StaticOff>(self, off: O) -> O::Ops {
-        let value = unsafe { self.mapped().as_ptr().add(off.value()) };
+        let value = unsafe { self.addr().add(off.value()) };
 
         <O::Ops as StaticOps>::new(value)
     }
@@ -137,20 +137,8 @@ pub trait Kernel: MappedKernel {
 
 /// Mapped PS4 kernel in the memory.
 pub trait MappedKernel: Sized + Copy + Send + Sync + 'static {
-    /// # Safety
-    /// `base` must point to a valid address of the kernel. Behavior is undefined if format of the
-    /// kernel is unknown.
-    ///
-    /// # Panics
-    /// This function may panic if format of the kernel is unknown.
-    unsafe fn new(base: *const u8) -> Self;
-
-    /// Returns mapped memory of the kernel.
-    ///
-    /// # Safety
-    /// The returned slice can contains `PF_W` programs. That mean the memory covered by this slice
-    /// can mutate at any time. The whole slice is guarantee to be readable.
-    unsafe fn mapped(self) -> &'static [u8];
+    /// Returns mapped address of the kernel.
+    fn addr(self) -> *const u8;
 }
 
 /// Offset of a static value in the kernel.

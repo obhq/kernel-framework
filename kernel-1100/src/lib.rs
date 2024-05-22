@@ -21,7 +21,7 @@ mod uio;
 
 /// Implementation of [`okf::Kernel`] for 11.00.
 #[derive(Clone, Copy, MappedKernel)]
-pub struct Kernel(&'static [u8]);
+pub struct Kernel(*const u8);
 
 impl okf::Kernel for Kernel {
     #[offset(0x15415B0)]
@@ -101,3 +101,6 @@ impl okf::Kernel for Kernel {
     unsafe fn solisten(self, so: *mut Self::Socket, backlog: c_int, td: *mut Self::Thread)
         -> c_int;
 }
+
+unsafe impl Send for Kernel {}
+unsafe impl Sync for Kernel {}

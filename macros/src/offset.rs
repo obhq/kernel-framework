@@ -55,7 +55,7 @@ fn transform_fn(args: LitInt, mut item: TraitItemFn) -> syn::Result<TokenStream>
     }
 
     item.default = Some(parse_quote!({
-        let _addr = unsafe { self.mapped().as_ptr().add(#offset) };
+        let _addr = unsafe { self.addr().add(#offset) };
         let _fp: unsafe extern "C" fn(#params) #ret = unsafe { core::mem::transmute(_addr) };
         unsafe { _fp(#args) }
     }));
