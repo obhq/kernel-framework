@@ -1,3 +1,8 @@
+use super::{SockAddr, AF_INET};
+use core::mem::{size_of, transmute};
+
+pub const INADDR_ANY: u32 = 0;
+
 /// Represents `sockaddr_in` structure.
 #[repr(C)]
 pub struct SockAddrIn {
@@ -8,8 +13,44 @@ pub struct SockAddrIn {
     pub sin_zero: [u8; 8],
 }
 
+impl SockAddrIn {
+    /// `port` is in host's endianness.
+    pub fn new(addr: InAddr, port: u16) -> Self {
+        Self {
+            sin_len: size_of::<Self>() as _,
+            sin_family: AF_INET as _,
+            sin_port: port.to_be(),
+            sin_addr: addr,
+            sin_zero: [0; 8],
+        }
+    }
+}
+
+impl AsRef<SockAddr> for SockAddrIn {
+    fn as_ref(&self) -> &SockAddr {
+        unsafe { transmute(self) }
+    }
+}
+
+impl AsMut<SockAddr> for SockAddrIn {
+    fn as_mut(&mut self) -> &mut SockAddr {
+        unsafe { transmute(self) }
+    }
+}
+
 /// Represents `in_addr` structure.
 #[repr(C)]
+#[derive(Clone, Copy)]
 pub struct InAddr {
     pub s_addr: u32,
+}
+
+impl InAddr {
+    pub const ANY: Self = Self { s_addr: 0 };
+}
+
+impl From<u32> for InAddr {
+    fn from(value: u32) -> Self {
+        Self { s_addr: value }
+    }
 }
