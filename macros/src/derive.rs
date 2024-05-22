@@ -37,7 +37,7 @@ pub fn mapped_kernel(item: ItemStruct) -> syn::Result<TokenStream> {
         impl #ident {
             /// # Safety
             /// `LSTAR` register must be original value.
-            unsafe fn new() -> Self {
+            pub unsafe fn new() -> Self {
                 // Read LSTAR register.
                 let mut edx = 0u32;
                 let mut eax = 0u32;
