@@ -1,6 +1,7 @@
 #![no_std]
 
 use self::file::File;
+use self::lock::LockObject;
 use self::malloc::{Malloc, MallocFlags};
 use self::socket::{SockAddr, Socket};
 use self::thread::Thread;
@@ -13,6 +14,7 @@ pub use okf_macros::*;
 
 pub mod ext;
 pub mod file;
+pub mod lock;
 pub mod malloc;
 pub mod socket;
 pub mod thread;
@@ -21,13 +23,14 @@ pub mod uio;
 
 /// Provides methods to access the PS4 kernel for a specific version.
 ///
-/// Most methods here are a direct call to the kernel so most of them are unsafe. Some safe wrapper
-/// for those methods are provides by [`self::ext::KernelExt`], which is automatically implemented
-/// for any type that implement [`Kernel`].
+/// Most methods here are a direct call to the kernel so most of them are unsafe and hard to use.
+/// There are some high-level version provided by [`self::ext::KernelExt`], which is automatically
+/// implemented on any type that implement [`Kernel`].
 pub trait Kernel: MappedKernel {
     const M_TEMP: StaticMut<Self::Malloc>;
 
     type File: File;
+    type LockObject: LockObject;
     type Malloc: Malloc;
     type Socket: Socket;
     type Thread: Thread<Self>;
@@ -93,6 +96,18 @@ pub trait Kernel: MappedKernel {
     /// # Safety
     /// `ty` cannot be null.
     unsafe fn malloc(self, size: usize, ty: *mut Self::Malloc, flags: MallocFlags) -> *mut u8;
+
+    /// # Safety
+    /// - `ident` cannot be null.
+    /// - `wmesg` cannot be null and must point to a null-terminated string.
+    unsafe fn sleep(
+        self,
+        ident: *mut (),
+        lock: *mut Self::LockObject,
+        priority: c_int,
+        wmesg: *const c_char,
+        timo: c_int,
+    ) -> c_int;
 
     /// # Safety
     /// - `so` cannot be null.

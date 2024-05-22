@@ -1,6 +1,7 @@
 #![no_std]
 
 use self::file::File;
+use self::lock::LockObject;
 use self::malloc::Malloc;
 use self::socket::Socket;
 use self::thread::Thread;
@@ -13,6 +14,7 @@ use okf::uio::UioSeg;
 use okf::{offset, MappedKernel, StaticMut};
 
 mod file;
+mod lock;
 mod malloc;
 mod socket;
 mod thread;
@@ -28,6 +30,7 @@ impl okf::Kernel for Kernel {
     const M_TEMP: StaticMut<Self::Malloc>;
 
     type File = File;
+    type LockObject = LockObject;
     type Malloc = Malloc;
     type Socket = Socket;
     type Thread = Thread;
@@ -71,6 +74,16 @@ impl okf::Kernel for Kernel {
 
     #[offset(0x1A4220)]
     unsafe fn malloc(self, size: usize, ty: *mut Self::Malloc, flags: MallocFlags) -> *mut u8;
+
+    #[offset(0x365F50)]
+    unsafe fn sleep(
+        self,
+        ident: *mut (),
+        lock: *mut Self::LockObject,
+        priority: c_int,
+        wmesg: *const c_char,
+        timo: c_int,
+    ) -> c_int;
 
     #[offset(0x264AF0)]
     unsafe fn soaccept(self, so: *mut Self::Socket, nam: *mut *mut SockAddr) -> c_int;
