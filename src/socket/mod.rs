@@ -24,6 +24,10 @@ impl<K: Kernel> OwnedSocket<K> {
     pub unsafe fn new(kernel: K, sock: *mut K::Socket) -> Self {
         Self { kernel, sock }
     }
+
+    pub fn as_raw(&self) -> *mut K::Socket {
+        self.sock
+    }
 }
 
 impl<K: Kernel> Drop for OwnedSocket<K> {
