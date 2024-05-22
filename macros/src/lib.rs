@@ -2,6 +2,7 @@ use proc_macro::TokenStream;
 use syn::{parse_macro_input, Error, ItemStruct, LitInt, TraitItem};
 
 mod derive;
+mod kernel;
 mod offset;
 
 #[proc_macro_derive(MappedKernel)]
@@ -11,6 +12,12 @@ pub fn derive_mapped_kernel(item: TokenStream) -> TokenStream {
     self::derive::mapped_kernel(item)
         .unwrap_or_else(Error::into_compile_error)
         .into()
+}
+
+/// Create a new kernel object based on `fw` configuration value.
+#[proc_macro]
+pub fn kernel(_: TokenStream) -> TokenStream {
+    self::kernel::render().into()
 }
 
 #[proc_macro_attribute]
