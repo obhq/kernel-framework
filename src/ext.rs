@@ -1,5 +1,6 @@
 use crate::file::OwnedFile;
 use crate::socket::{OwnedSocket, SockAddr};
+use crate::thread::Thread;
 use crate::Kernel;
 use core::ffi::c_int;
 use core::num::NonZeroI32;
@@ -18,14 +19,12 @@ pub trait KernelExt: Kernel {
     ) -> Result<OwnedFile<Self>, NonZeroI32>;
 
     /// # Safety
-    /// - `cred` cannot be null.
     /// - `td` cannot be null.
-    unsafe fn create_socket(
+    unsafe fn socket(
         self,
         dom: c_int,
         ty: c_int,
         proto: c_int,
-        cred: *mut Self::Ucred,
         td: *mut Self::Thread,
     ) -> Result<OwnedSocket<Self>, NonZeroI32>;
 
@@ -55,15 +54,15 @@ impl<T: Kernel> KernelExt for T {
         }
     }
 
-    unsafe fn create_socket(
+    unsafe fn socket(
         self,
         dom: c_int,
         ty: c_int,
         proto: c_int,
-        cred: *mut Self::Ucred,
         td: *mut Self::Thread,
     ) -> Result<OwnedSocket<Self>, NonZeroI32> {
         let mut so = null_mut();
+        let cred = (*td).cred();
         let errno = self.socreate(dom, &mut so, ty, proto, cred, td);
 
         match NonZeroI32::new(errno) {
