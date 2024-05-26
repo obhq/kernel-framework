@@ -83,6 +83,15 @@ impl okf::Kernel for Kernel {
     #[offset(0x1A4220)]
     unsafe fn malloc(self, size: usize, ty: *mut Self::Malloc, flags: MallocFlags) -> *mut u8;
 
+    #[offset(0x10E6A0)]
+    unsafe fn mtx_lock_flags(
+        self,
+        m: *mut Self::Mtx,
+        opts: c_int,
+        file: *const c_char,
+        line: c_int,
+    );
+
     #[offset(0x365F50)]
     unsafe fn sleep(
         self,

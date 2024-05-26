@@ -112,6 +112,17 @@ pub trait Kernel: MappedKernel {
     unsafe fn malloc(self, size: usize, ty: *mut Self::Malloc, flags: MallocFlags) -> *mut u8;
 
     /// # Safety
+    /// - `m` cannot be null.
+    /// - `file` cannot be null and must point to a null-terminated string.
+    unsafe fn mtx_lock_flags(
+        self,
+        m: *mut Self::Mtx,
+        opts: c_int,
+        file: *const c_char,
+        line: c_int,
+    );
+
+    /// # Safety
     /// - `ident` cannot be null.
     /// - `wmesg` cannot be null and must point to a null-terminated string.
     unsafe fn sleep(
