@@ -123,6 +123,17 @@ pub trait Kernel: MappedKernel {
     );
 
     /// # Safety
+    /// - `m` cannot be null.
+    /// - `file` cannot be null and must point to a null-terminated string.
+    unsafe fn mtx_unlock_flags(
+        self,
+        m: *mut Self::Mtx,
+        opts: c_int,
+        file: *const c_char,
+        line: c_int,
+    );
+
+    /// # Safety
     /// - `ident` cannot be null.
     /// - `wmesg` cannot be null and must point to a null-terminated string.
     unsafe fn sleep(

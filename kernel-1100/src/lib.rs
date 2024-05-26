@@ -92,6 +92,15 @@ impl okf::Kernel for Kernel {
         line: c_int,
     );
 
+    #[offset(0x10E950)]
+    unsafe fn mtx_unlock_flags(
+        self,
+        m: *mut Self::Mtx,
+        opts: c_int,
+        file: *const c_char,
+        line: c_int,
+    );
+
     #[offset(0x365F50)]
     unsafe fn sleep(
         self,
