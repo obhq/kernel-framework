@@ -12,7 +12,7 @@ use core::ffi::{c_char, c_int};
 use okf::malloc::MallocFlags;
 use okf::socket::SockAddr;
 use okf::uio::UioSeg;
-use okf::{offset, MappedKernel, StaticMut};
+use okf::{offset, panic_handler, MappedKernel, StaticMut};
 
 mod file;
 mod lock;
@@ -121,3 +121,5 @@ impl okf::Kernel for Kernel {
 
 unsafe impl Send for Kernel {}
 unsafe impl Sync for Kernel {}
+
+panic_handler!(0x1987C0);
