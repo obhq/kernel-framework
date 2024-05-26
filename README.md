@@ -4,7 +4,7 @@ Orbis Kernel Framework (OKF) is a Rust crate for developing an application that 
 
 ## Develop a kernel application
 
-Before start you need to add `x86_64-unknown-none` target to Rust:
+Before start you need to install `x86_64-unknown-none` target:
 
 ```sh
 rustup target add x86_64-unknown-none
@@ -28,7 +28,14 @@ target = "x86_64-unknown-none"
 rustflags = ["--cfg", "fw=\"FW\""]
 ```
 
-Change `FW` to the firmware version you want to run on (e.g. `1100` for 11.00). You will need an additional crate depend on the firmware you choose here (e.g. `okf-1100` for 11.00). If no public crate available for your firmware you need to build one. See one of available crate as a reference.
+Replace `FW` with the firmware version you want to run on (e.g. `1100` for 11.00). You need to add additional dependency to `Cargo.toml` on the root of the project depend on the firmware you choose here (e.g. `okf-1100` for 11.00):
+
+```toml
+[target.'cfg(fw = "1100")'.dependencies]
+okf-1100 = { version = "0.1.0", features = ["panic-handler"] }
+```
+
+If no public crate available for your firmware you need to build one. See one of available crate as a reference.
 
 ## License
 

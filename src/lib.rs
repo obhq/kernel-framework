@@ -1,7 +1,7 @@
 #![no_std]
 
 use self::file::File;
-use self::lock::LockObject;
+use self::lock::{LockObject, Mtx};
 use self::malloc::{Malloc, MallocFlags};
 use self::pcpu::Pcpu;
 use self::socket::{SockAddr, Socket};
@@ -34,15 +34,17 @@ macro_rules! kernel {
 /// Provides methods to access the PS4 kernel for a specific version.
 ///
 /// Most methods here are a direct call to the kernel so most of them are unsafe and hard to use.
-/// There are some high-level version provided by [`self::ext::KernelExt`], which is automatically
-/// implemented on any type that implement [`Kernel`].
+/// There are some high-level versions are provided by [`self::ext::KernelExt`], which is
+/// automatically implemented on any type that implement [`Kernel`].
 pub trait Kernel: MappedKernel {
+    const ACCEPT_MTX: StaticMut<Self::Mtx>;
     const M_TEMP: StaticMut<Self::Malloc>;
     const NOCPU: u32;
 
     type File: File;
     type LockObject: LockObject;
     type Malloc: Malloc;
+    type Mtx: Mtx;
     type Pcpu: Pcpu<Self>;
     type Socket: Socket;
     type Thread: Thread<Self>;

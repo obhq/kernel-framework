@@ -1,7 +1,7 @@
 #![no_std]
 
 use self::file::File;
-use self::lock::LockObject;
+use self::lock::{LockObject, Mtx};
 use self::malloc::Malloc;
 use self::pcpu::Pcpu;
 use self::socket::Socket;
@@ -28,6 +28,9 @@ mod uio;
 pub struct Kernel(*const u8);
 
 impl okf::Kernel for Kernel {
+    #[offset(0x221CCF8)]
+    const ACCEPT_MTX: StaticMut<Self::Mtx>;
+
     #[offset(0x15415B0)]
     const M_TEMP: StaticMut<Self::Malloc>;
     const NOCPU: u32 = 0xff;
@@ -35,6 +38,7 @@ impl okf::Kernel for Kernel {
     type File = File;
     type LockObject = LockObject;
     type Malloc = Malloc;
+    type Mtx = Mtx;
     type Pcpu = Pcpu;
     type Socket = Socket;
     type Thread = Thread;
