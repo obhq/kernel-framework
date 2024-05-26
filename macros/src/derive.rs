@@ -34,21 +34,21 @@ pub fn mapped_kernel(item: ItemStruct) -> syn::Result<TokenStream> {
     let ident = item.ident;
 
     Ok(quote! {
-        impl #ident {
-            /// # Safety
-            /// `LSTAR` register must be original value.
-            pub unsafe fn new() -> Self {
+        impl Default for #ident {
+            fn default() -> Self {
                 // Read LSTAR register.
                 let mut edx = 0u32;
                 let mut eax = 0u32;
 
-                core::arch::asm!(
-                    "rdmsr",
-                    in("ecx") 0xc0000082u32,
-                    out("edx") edx,
-                    out("eax") eax,
-                    options(pure, nomem, preserves_flags, nostack)
-                );
+                unsafe {
+                    core::arch::asm!(
+                        "rdmsr",
+                        in("ecx") 0xc0000082u32,
+                        out("edx") edx,
+                        out("eax") eax,
+                        options(pure, nomem, preserves_flags, nostack)
+                    );
+                }
 
                 // Get base address of the kernel.
                 let aslr = ((edx as usize) << 32 | (eax as usize)) - 0xffffffff822001c0;

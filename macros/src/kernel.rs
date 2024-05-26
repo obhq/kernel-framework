@@ -1,11 +1,16 @@
-use proc_macro2::TokenStream;
-use quote::quote;
+use proc_macro2::{Span, TokenStream};
+use quote::ToTokens;
+use syn::{parse_quote, Error, Path};
 
-pub fn render() -> TokenStream {
-    quote!({
-        #[cfg(fw = "1100")]
-        let k = okf_1100::Kernel::new();
+pub fn render() -> syn::Result<TokenStream> {
+    let ty: Path = if cfg!(fw = "1100") {
+        parse_quote!(okf_1100::Kernel)
+    } else {
+        return Err(Error::new(
+            Span::call_site(),
+            "invalid `fw` configuration, see okf README for the instructions",
+        ));
+    };
 
-        k
-    })
+    Ok(ty.into_token_stream())
 }

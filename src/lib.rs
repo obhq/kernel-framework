@@ -151,7 +151,7 @@ pub trait Kernel: MappedKernel {
 }
 
 /// Mapped PS4 kernel in the memory.
-pub trait MappedKernel: Sized + Copy + Send + Sync + 'static {
+pub trait MappedKernel: Default + Sized + Copy + Send + Sync + 'static {
     /// Returns mapped address of the kernel.
     fn addr(self) -> *const u8;
 }

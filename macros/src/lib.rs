@@ -14,10 +14,15 @@ pub fn derive_mapped_kernel(item: TokenStream) -> TokenStream {
         .into()
 }
 
-/// Create a new kernel object based on `fw` configuration value.
+/// Renders kernel type based on `fw` configuration.
+///
+/// This macro was designed to be used by the application. Use trait bound with `okf::Kernel`
+/// instead if you are building a library.
 #[proc_macro]
 pub fn kernel(_: TokenStream) -> TokenStream {
-    self::kernel::render().into()
+    self::kernel::render()
+        .unwrap_or_else(Error::into_compile_error)
+        .into()
 }
 
 #[proc_macro_attribute]
