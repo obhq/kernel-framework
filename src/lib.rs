@@ -21,6 +21,14 @@ pub mod thread;
 pub mod ucred;
 pub mod uio;
 
+#[cfg(fw = "1100")]
+#[macro_export]
+macro_rules! kernel {
+    () => {
+        okf_1100::Kernel
+    };
+}
+
 /// Provides methods to access the PS4 kernel for a specific version.
 ///
 /// Most methods here are a direct call to the kernel so most of them are unsafe and hard to use.
