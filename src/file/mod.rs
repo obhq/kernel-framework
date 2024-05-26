@@ -1,4 +1,4 @@
-use crate::thread::Thread;
+use crate::pcpu::Pcpu;
 use crate::Kernel;
 use core::sync::atomic::{fence, AtomicU32, Ordering};
 
@@ -33,6 +33,6 @@ impl<K: Kernel> Drop for OwnedFile<K> {
         fence(Ordering::Acquire);
 
         // The kernel itself does not check if fdrop is success so we don't need to.
-        unsafe { self.kernel.fdrop(self.file, K::Thread::current()) };
+        unsafe { self.kernel.fdrop(self.file, K::Pcpu::curthread()) };
     }
 }

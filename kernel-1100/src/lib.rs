@@ -3,6 +3,7 @@
 use self::file::File;
 use self::lock::LockObject;
 use self::malloc::Malloc;
+use self::pcpu::Pcpu;
 use self::socket::Socket;
 use self::thread::Thread;
 use self::ucred::Ucred;
@@ -16,6 +17,7 @@ use okf::{offset, MappedKernel, StaticMut};
 mod file;
 mod lock;
 mod malloc;
+mod pcpu;
 mod socket;
 mod thread;
 mod ucred;
@@ -28,10 +30,12 @@ pub struct Kernel(*const u8);
 impl okf::Kernel for Kernel {
     #[offset(0x15415B0)]
     const M_TEMP: StaticMut<Self::Malloc>;
+    const NOCPU: u32 = 0xff;
 
     type File = File;
     type LockObject = LockObject;
     type Malloc = Malloc;
+    type Pcpu = Pcpu;
     type Socket = Socket;
     type Thread = Thread;
     type Ucred = Ucred;

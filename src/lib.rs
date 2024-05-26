@@ -3,6 +3,7 @@
 use self::file::File;
 use self::lock::LockObject;
 use self::malloc::{Malloc, MallocFlags};
+use self::pcpu::Pcpu;
 use self::socket::{SockAddr, Socket};
 use self::thread::Thread;
 use self::ucred::Ucred;
@@ -16,6 +17,7 @@ pub mod ext;
 pub mod file;
 pub mod lock;
 pub mod malloc;
+pub mod pcpu;
 pub mod socket;
 pub mod thread;
 pub mod ucred;
@@ -36,10 +38,12 @@ macro_rules! kernel {
 /// implemented on any type that implement [`Kernel`].
 pub trait Kernel: MappedKernel {
     const M_TEMP: StaticMut<Self::Malloc>;
+    const NOCPU: u32;
 
     type File: File;
     type LockObject: LockObject;
     type Malloc: Malloc;
+    type Pcpu: Pcpu<Self>;
     type Socket: Socket;
     type Thread: Thread<Self>;
     type Ucred: Ucred;
