@@ -13,9 +13,12 @@ pub const SOCK_DGRAM: c_int = 2;
 pub trait Socket: Sized {
     /// Returns a value of `so_error`.
     fn error(&self) -> c_ushort;
+    fn set_error(&self, v: c_ushort);
 
-    /// Returns a mutable reference to `so_timeo`.
-    fn timeout_mut(&mut self) -> &mut c_short;
+    /// Returns address of `so_timeo`.
+    ///
+    /// This address is used only as a sleep/wakeup address. Do not read or write a value to it.
+    fn timeout(&self) -> *mut c_short;
 }
 
 /// RAII struct to call [`Kernel::soclose`] when dropped.

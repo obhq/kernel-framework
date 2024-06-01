@@ -1,19 +1,24 @@
 use core::ffi::{c_short, c_ushort};
+use core::sync::atomic::{AtomicU16, Ordering};
 
 /// Implementation of [`okf::socket::Socket`] for 11.00.
 #[repr(C)]
 pub struct Socket {
     pad1: [u8; 0x6d],
     timeout: c_short,
-    error: c_ushort,
+    error: AtomicU16,
 }
 
 impl okf::socket::Socket for Socket {
     fn error(&self) -> c_ushort {
-        self.error
+        self.error.load(Ordering::Relaxed)
     }
 
-    fn timeout_mut(&mut self) -> &mut c_short {
-        &mut self.timeout
+    fn set_error(&self, v: c_ushort) {
+        self.error.store(v, Ordering::Relaxed);
+    }
+
+    fn timeout(&self) -> *mut c_short {
+        &self.timeout as *const c_short as _
     }
 }
