@@ -1,6 +1,6 @@
 pub use self::inet::*;
 use crate::Kernel;
-use core::ffi::c_int;
+use core::ffi::{c_int, c_short};
 
 mod inet;
 
@@ -10,7 +10,10 @@ pub const SOCK_STREAM: c_int = 1;
 pub const SOCK_DGRAM: c_int = 2;
 
 /// Represents `socket` structure.
-pub trait Socket: Sized {}
+pub trait Socket: Sized {
+    /// Returns a mutable reference to `so_timeo`.
+    fn timeout_mut(&mut self) -> &mut c_short;
+}
 
 /// RAII struct to call [`Kernel::soclose`] when dropped.
 pub struct OwnedSocket<K: Kernel> {
