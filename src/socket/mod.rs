@@ -1,6 +1,6 @@
 pub use self::inet::*;
 use crate::Kernel;
-use core::ffi::{c_int, c_short};
+use core::ffi::{c_int, c_short, c_ushort};
 
 mod inet;
 
@@ -11,6 +11,9 @@ pub const SOCK_DGRAM: c_int = 2;
 
 /// Represents `socket` structure.
 pub trait Socket: Sized {
+    /// Returns a value of `so_error`.
+    fn error(&self) -> c_ushort;
+
     /// Returns a mutable reference to `so_timeo`.
     fn timeout_mut(&mut self) -> &mut c_short;
 }
