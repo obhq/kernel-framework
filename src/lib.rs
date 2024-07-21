@@ -16,6 +16,7 @@ use core::ops::Deref;
 pub use okf_macros::*;
 
 pub mod ext;
+pub mod fcntl;
 pub mod file;
 pub mod lock;
 pub mod malloc;
