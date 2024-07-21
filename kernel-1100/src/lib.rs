@@ -3,6 +3,7 @@
 use self::file::File;
 use self::lock::{LockObject, Mtx};
 use self::malloc::Malloc;
+use self::mount::Mount;
 use self::pcpu::Pcpu;
 use self::socket::Socket;
 use self::thread::Thread;
@@ -17,6 +18,7 @@ use okf::{offset, panic_handler, MappedKernel, StaticMut};
 mod file;
 mod lock;
 mod malloc;
+mod mount;
 mod pcpu;
 mod socket;
 mod thread;
@@ -38,6 +40,7 @@ impl okf::Kernel for Kernel {
     type File = File;
     type LockObject = LockObject;
     type Malloc = Malloc;
+    type Mount = Mount;
     type Mtx = Mtx;
     type Pcpu = Pcpu;
     type Socket = Socket;

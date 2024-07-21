@@ -3,6 +3,7 @@
 use self::file::File;
 use self::lock::{LockObject, Mtx};
 use self::malloc::{Malloc, MallocFlags};
+use self::mount::Mount;
 use self::pcpu::Pcpu;
 use self::socket::{SockAddr, Socket};
 use self::thread::Thread;
@@ -17,7 +18,9 @@ pub mod ext;
 pub mod file;
 pub mod lock;
 pub mod malloc;
+pub mod mount;
 pub mod pcpu;
+pub mod queue;
 pub mod socket;
 pub mod thread;
 pub mod ucred;
@@ -44,6 +47,7 @@ pub trait Kernel: MappedKernel {
     type File: File;
     type LockObject: LockObject;
     type Malloc: Malloc;
+    type Mount: Mount;
     type Mtx: Mtx<Self>;
     type Pcpu: Pcpu<Self>;
     type Socket: Socket;
