@@ -1,5 +1,6 @@
 #![no_std]
 
+use self::fcntl::OpenFlags;
 use self::file::File;
 use self::lock::{LockObject, Mtx};
 use self::malloc::{Malloc, MallocFlags};
@@ -98,7 +99,7 @@ pub trait Kernel: MappedKernel {
         fd: c_int,
         path: *const c_char,
         seg: UioSeg,
-        flags: c_int,
+        flags: OpenFlags,
         mode: c_int,
     ) -> c_int;
 
