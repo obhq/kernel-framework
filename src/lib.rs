@@ -39,9 +39,8 @@ macro_rules! kernel {
 
 /// Provides methods to access the PS4 kernel for a specific version.
 ///
-/// Most methods here are a direct call to the kernel so most of them are unsafe and hard to use.
-/// There are some high-level versions are provided by [`self::ext::KernelExt`], which is
-/// automatically implemented on any type that implement [`Kernel`].
+/// All methods here are a direct call to the kernel so most of them are unsafe and hard to use.
+/// Some modules may provide high-level wrappers that are easy to use.
 pub trait Kernel: MappedKernel {
     const ACCEPT_MTX: StaticMut<Self::Mtx>;
     const M_TEMP: StaticMut<Self::Malloc>;
@@ -65,6 +64,17 @@ pub trait Kernel: MappedKernel {
 
         <O::Ops as StaticOps>::new(value)
     }
+
+    /// # Safety
+    /// `fp` cannot be null.
+    unsafe fn fget(
+        self,
+        td: *mut Self::Thread,
+        fd: c_int,
+        fp: *mut *mut Self::File,
+        mode: c_int,
+        maxprotp: *mut u8,
+    ) -> c_int;
 
     /// # Safety
     /// `fp` cannot be null.

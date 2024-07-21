@@ -53,6 +53,16 @@ impl okf::Kernel for Kernel {
     type Ucred = Ucred;
     type Uio = Uio;
 
+    #[offset(0x419040)]
+    unsafe fn fget(
+        self,
+        td: *mut Self::Thread,
+        fd: c_int,
+        fp: *mut *mut Self::File,
+        mode: c_int,
+        maxprotp: *mut u8,
+    ) -> c_int;
+
     #[offset(0x4191C0)]
     unsafe fn fget_write(
         self,
