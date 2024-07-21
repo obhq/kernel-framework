@@ -37,6 +37,8 @@ impl okf::Kernel for Kernel {
     const M_TEMP: StaticMut<Self::Malloc>;
     #[offset(0x1A6AD60)]
     const MOUNTLIST: StaticMut<TailQueue<Self::Mount>>;
+    #[offset(0x22D0F10)]
+    const MOUNTLIST_MTX: StaticMut<Self::Mtx>;
     const NOCPU: u32 = 0xff;
 
     type File = File;

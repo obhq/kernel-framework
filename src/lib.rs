@@ -44,6 +44,7 @@ pub trait Kernel: MappedKernel {
     const ACCEPT_MTX: StaticMut<Self::Mtx>;
     const M_TEMP: StaticMut<Self::Malloc>;
     const MOUNTLIST: StaticMut<TailQueue<Self::Mount>>;
+    const MOUNTLIST_MTX: StaticMut<Self::Mtx>;
     const NOCPU: u32;
 
     type File: File;
