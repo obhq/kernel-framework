@@ -5,6 +5,7 @@ use self::lock::{LockObject, Mtx};
 use self::malloc::{Malloc, MallocFlags};
 use self::mount::Mount;
 use self::pcpu::Pcpu;
+use self::queue::TailQueue;
 use self::socket::{SockAddr, Socket};
 use self::thread::Thread;
 use self::ucred::Ucred;
@@ -42,6 +43,7 @@ macro_rules! kernel {
 pub trait Kernel: MappedKernel {
     const ACCEPT_MTX: StaticMut<Self::Mtx>;
     const M_TEMP: StaticMut<Self::Malloc>;
+    const MOUNTLIST: StaticMut<TailQueue<Self::Mount>>;
     const NOCPU: u32;
 
     type File: File;

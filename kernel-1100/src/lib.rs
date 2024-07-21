@@ -11,6 +11,7 @@ use self::ucred::Ucred;
 use self::uio::Uio;
 use core::ffi::{c_char, c_int};
 use okf::malloc::MallocFlags;
+use okf::queue::TailQueue;
 use okf::socket::SockAddr;
 use okf::uio::UioSeg;
 use okf::{offset, panic_handler, MappedKernel, StaticMut};
@@ -32,9 +33,10 @@ pub struct Kernel(*const u8);
 impl okf::Kernel for Kernel {
     #[offset(0x221CCF8)]
     const ACCEPT_MTX: StaticMut<Self::Mtx>;
-
     #[offset(0x15415B0)]
     const M_TEMP: StaticMut<Self::Malloc>;
+    #[offset(0x1A6AD60)]
+    const MOUNTLIST: StaticMut<TailQueue<Self::Mount>>;
     const NOCPU: u32 = 0xff;
 
     type File = File;
