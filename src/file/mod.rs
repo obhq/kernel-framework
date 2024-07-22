@@ -1,5 +1,8 @@
 use crate::pcpu::Pcpu;
 use crate::Kernel;
+use core::ffi::c_int;
+use core::num::NonZero;
+use core::ptr::null_mut;
 use core::sync::atomic::{fence, AtomicU32, Ordering};
 
 /// Represents `file` structure.
@@ -10,7 +13,7 @@ pub trait File: Sized {
 
 /// RAII struct to decrease `file::f_count` when dropped.
 pub struct OwnedFile<K: Kernel> {
-    kernel: K,
+    kern: K,
     file: *mut K::File,
 }
 
@@ -18,8 +21,19 @@ impl<K: Kernel> OwnedFile<K> {
     /// # Safety
     /// `file` cannot be null and the caller must own a strong reference to it. This method do
     /// **not** increase the reference count of this file.
-    pub unsafe fn new(kernel: K, file: *mut K::File) -> Self {
-        Self { kernel, file }
+    pub unsafe fn new(kern: K, file: *mut K::File) -> Self {
+        Self { kern, file }
+    }
+
+    pub fn from_fd(kern: K, fd: c_int) -> Result<Self, NonZero<c_int>> {
+        let td = K::Pcpu::curthread();
+        let mut fp = null_mut();
+        let errno = unsafe { kern.fget(td, fd, &mut fp, 0, null_mut()) };
+
+        match NonZero::new(errno) {
+            Some(v) => Err(v),
+            None => Ok(Self { kern, file: fp }),
+        }
     }
 }
 
@@ -33,6 +47,6 @@ impl<K: Kernel> Drop for OwnedFile<K> {
         fence(Ordering::Acquire);
 
         // The kernel itself does not check if fdrop is success so we don't need to.
-        unsafe { self.kernel.fdrop(self.file, K::Pcpu::curthread()) };
+        unsafe { self.kern.fdrop(self.file, K::Pcpu::curthread()) };
     }
 }

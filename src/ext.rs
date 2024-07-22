@@ -1,4 +1,3 @@
-use crate::file::OwnedFile;
 use crate::socket::{OwnedSocket, SockAddr};
 use crate::thread::Thread;
 use crate::Kernel;
@@ -10,14 +9,6 @@ use core::ptr::null_mut;
 ///
 /// This trait is automatically implemented for any type that implement [`Kernel`].
 pub trait KernelExt: Kernel {
-    /// # Safety
-    /// `td` should not be null although the PS4 does not use it currently.
-    unsafe fn fget_write(
-        self,
-        td: *mut Self::Thread,
-        fd: c_int,
-    ) -> Result<OwnedFile<Self>, NonZeroI32>;
-
     /// # Safety
     /// - `td` cannot be null.
     unsafe fn socket(
@@ -50,20 +41,6 @@ pub trait KernelExt: Kernel {
 }
 
 impl<T: Kernel> KernelExt for T {
-    unsafe fn fget_write(
-        self,
-        td: *mut Self::Thread,
-        fd: c_int,
-    ) -> Result<OwnedFile<Self>, NonZeroI32> {
-        let mut fp = null_mut();
-        let errno = self.fget_write(td, fd, 0, &mut fp);
-
-        match NonZeroI32::new(errno) {
-            Some(v) => Err(v),
-            None => Ok(OwnedFile::new(self, fp)),
-        }
-    }
-
     unsafe fn socket(
         self,
         dom: c_int,
