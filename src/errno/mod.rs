@@ -8,7 +8,7 @@ pub struct Errno(NonZero<c_int>);
 impl Errno {
     /// Returns [`None`] if `v` is zero.
     pub fn new(v: c_int) -> Option<Self> {
-        NonZero::new(v).map(|v| Self(v))
+        NonZero::new(v).map(Self)
     }
 }
 
