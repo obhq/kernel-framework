@@ -2,6 +2,20 @@
 
 Orbis Kernel Framework (OKF) is a Rust crate for developing an application that run inside a PS4 kernel.
 
+## Usage
+
+This crate currently not published to crates.io yet due to its API are still highly unstable. The recommended way to use it at this stage is via [Git](https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#specifying-dependencies-from-git-repositories) dependency like the following:
+
+```toml
+[dependencies]
+okf = { git = "https://github.com/obhq/kernel-framework.git" }
+
+[target.'cfg(fw = "1100")'.dependencies]
+okf-1100 = { git = "https://github.com/obhq/kernel-framework.git" }
+```
+
+Please note that all examples below was designed to use with crates.io so you may need to adjust it.
+
 ## Develop a kernel application
 
 Before start you need to install `x86_64-unknown-none` target:
