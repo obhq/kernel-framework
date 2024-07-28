@@ -1,6 +1,9 @@
 pub use self::inet::*;
+use crate::thread::Thread;
 use crate::Kernel;
 use core::ffi::{c_int, c_short, c_ushort};
+use core::num::NonZero;
+use core::ptr::null_mut;
 
 mod inet;
 
@@ -23,15 +26,28 @@ pub trait Socket: Sized {
 
 /// RAII struct to call [`Kernel::soclose`] when dropped.
 pub struct OwnedSocket<K: Kernel> {
-    kernel: K,
+    kern: K,
     sock: *mut K::Socket,
 }
 
 impl<K: Kernel> OwnedSocket<K> {
     /// # Safety
-    /// `sock` cannot be null and the caller must be an owner.
-    pub unsafe fn new(kernel: K, sock: *mut K::Socket) -> Self {
-        Self { kernel, sock }
+    /// `td` cannot be null.
+    pub unsafe fn new(
+        kern: K,
+        dom: c_int,
+        ty: c_int,
+        proto: c_int,
+        td: *mut K::Thread,
+    ) -> Result<Self, NonZero<c_int>> {
+        let mut sock = null_mut();
+        let cred = (*td).cred();
+        let errno = kern.socreate(dom, &mut sock, ty, proto, cred, td);
+
+        match NonZero::new(errno) {
+            Some(v) => Err(v),
+            None => Ok(Self { kern, sock }),
+        }
     }
 
     pub fn as_raw(&self) -> *mut K::Socket {
@@ -42,7 +58,7 @@ impl<K: Kernel> OwnedSocket<K> {
 impl<K: Kernel> Drop for OwnedSocket<K> {
     fn drop(&mut self) {
         // The kernel itself does not check if soclose is success so we don't need to.
-        unsafe { self.kernel.soclose(self.sock) };
+        unsafe { self.kern.soclose(self.sock) };
     }
 }
 
