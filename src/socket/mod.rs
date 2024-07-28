@@ -12,6 +12,23 @@ pub const AF_INET: c_int = 2;
 pub const SOCK_STREAM: c_int = 1;
 pub const SOCK_DGRAM: c_int = 2;
 
+/// # Safety
+/// - `so` cannot be null.
+/// - `td` cannot be null.
+pub unsafe fn bind<K: Kernel>(
+    kern: K,
+    so: *mut K::Socket,
+    nam: &mut SockAddr,
+    td: *mut K::Thread,
+) -> Result<(), Errno> {
+    let errno = kern.sobind(so, nam, td);
+
+    match Errno::new(errno) {
+        Some(v) => Err(v),
+        None => Ok(()),
+    }
+}
+
 /// Represents `socket` structure.
 pub trait Socket: Sized {
     /// Returns a value of `so_error`.

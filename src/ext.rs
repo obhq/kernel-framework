@@ -1,4 +1,3 @@
-use crate::socket::SockAddr;
 use crate::Kernel;
 use core::ffi::c_int;
 use core::num::NonZeroI32;
@@ -7,16 +6,6 @@ use core::num::NonZeroI32;
 ///
 /// This trait is automatically implemented for any type that implement [`Kernel`].
 pub trait KernelExt: Kernel {
-    /// # Safety
-    /// - `so` cannot be null.
-    /// - `td` cannot be null.
-    unsafe fn bind(
-        self,
-        so: *mut Self::Socket,
-        nam: &mut SockAddr,
-        td: *mut Self::Thread,
-    ) -> Result<(), NonZeroI32>;
-
     /// # Safety
     /// - `so` cannot be null.
     /// - `td` cannot be null.
@@ -29,20 +18,6 @@ pub trait KernelExt: Kernel {
 }
 
 impl<T: Kernel> KernelExt for T {
-    unsafe fn bind(
-        self,
-        so: *mut Self::Socket,
-        nam: &mut SockAddr,
-        td: *mut Self::Thread,
-    ) -> Result<(), NonZeroI32> {
-        let errno = self.sobind(so, nam, td);
-
-        match NonZeroI32::new(errno) {
-            Some(v) => Err(v),
-            None => Ok(()),
-        }
-    }
-
     unsafe fn listen(
         self,
         so: *mut Self::Socket,
