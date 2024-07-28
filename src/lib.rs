@@ -18,6 +18,7 @@ pub use okf_macros::*;
 
 pub mod errno;
 pub mod fcntl;
+pub mod fd;
 pub mod file;
 pub mod lock;
 pub mod malloc;
@@ -100,6 +101,9 @@ pub trait Kernel: MappedKernel {
     /// If `addr` is not valid.
     unsafe fn free(self, addr: *mut u8, ty: *mut Self::Malloc);
 
+    /// Note that this method return an errno, not a FD! You can grab the FD from `td_retval[0]` if
+    /// this method return zero.
+    ///
     /// # Safety
     /// - `td` cannot be null.
     /// - `path` cannot be null and must point to a null-terminated string if `seg` is [`UioSeg::Kernel`].
