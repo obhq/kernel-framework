@@ -1,8 +1,8 @@
 pub use self::inet::*;
+use crate::errno::Errno;
 use crate::thread::Thread;
 use crate::Kernel;
 use core::ffi::{c_int, c_short, c_ushort};
-use core::num::NonZero;
 use core::ptr::null_mut;
 
 mod inet;
@@ -39,12 +39,12 @@ impl<K: Kernel> OwnedSocket<K> {
         ty: c_int,
         proto: c_int,
         td: *mut K::Thread,
-    ) -> Result<Self, NonZero<c_int>> {
+    ) -> Result<Self, Errno> {
         let mut sock = null_mut();
         let cred = (*td).cred();
         let errno = kern.socreate(dom, &mut sock, ty, proto, cred, td);
 
-        match NonZero::new(errno) {
+        match Errno::new(errno) {
             Some(v) => Err(v),
             None => Ok(Self { kern, sock }),
         }
