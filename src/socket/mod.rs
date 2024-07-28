@@ -29,6 +29,23 @@ pub unsafe fn bind<K: Kernel>(
     }
 }
 
+/// # Safety
+/// - `so` cannot be null.
+/// - `td` cannot be null.
+pub unsafe fn listen<K: Kernel>(
+    kern: K,
+    so: *mut K::Socket,
+    backlog: c_int,
+    td: *mut K::Thread,
+) -> Result<(), Errno> {
+    let errno = kern.solisten(so, backlog, td);
+
+    match Errno::new(errno) {
+        Some(v) => Err(v),
+        None => Ok(()),
+    }
+}
+
 /// Represents `socket` structure.
 pub trait Socket: Sized {
     /// Returns a value of `so_error`.
