@@ -10,7 +10,7 @@ use self::thread::Thread;
 use self::ucred::Ucred;
 use self::uio::Uio;
 use core::ffi::{c_char, c_int};
-use okf::fcntl::OpenFlags;
+use okf::fd::OpenFlags;
 use okf::malloc::MallocFlags;
 use okf::queue::TailQueue;
 use okf::socket::SockAddr;

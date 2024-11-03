@@ -1,6 +1,6 @@
 #![no_std]
 
-use self::fcntl::OpenFlags;
+use self::fd::OpenFlags;
 use self::file::File;
 use self::lock::{LockObject, Mtx};
 use self::malloc::{Malloc, MallocFlags};
@@ -17,7 +17,6 @@ use core::ops::Deref;
 pub use okf_macros::*;
 
 pub mod errno;
-pub mod fcntl;
 pub mod fd;
 pub mod file;
 pub mod lock;
