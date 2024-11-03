@@ -1,4 +1,4 @@
-use crate::errno::Errno;
+use crate::errno::{Errno, EINTR, EIO};
 use crate::pcpu::Pcpu;
 use crate::thread::Thread;
 use crate::uio::{IoVec, Uio, UioRw, UioSeg};
@@ -11,6 +11,7 @@ pub const AT_FDCWD: c_int = -100;
 
 /// # Safety
 /// `path` cannot be null and must point to a null-terminated string if `seg` is [`UioSeg::Kernel`].
+#[inline(never)]
 pub unsafe fn openat<K: Kernel>(
     kern: K,
     fd: c_int,
@@ -33,20 +34,46 @@ pub unsafe fn openat<K: Kernel>(
 }
 
 /// # Safety
-/// - `buf` cannot be null and must be valid up to `len` if `seg` is [`UioSeg::Kernel`].
-/// - `td` cannot be null.
+/// `td` cannot be null.
+#[inline(never)]
+pub unsafe fn write_all<K: Kernel>(
+    kern: K,
+    fd: c_int,
+    mut data: &[u8],
+    seg: UioSeg,
+    td: *mut K::Thread,
+) -> Result<(), Errno> {
+    while !data.is_empty() {
+        let written = match write(kern, fd, data, seg, td) {
+            Ok(v) => v,
+            Err(EINTR) => continue,
+            Err(e) => return Err(e),
+        };
+
+        if written == 0 {
+            return Err(EIO);
+        }
+
+        data = &data[written..];
+    }
+
+    Ok(())
+}
+
+/// # Safety
+/// `td` cannot be null.
+#[inline(never)]
 pub unsafe fn write<K: Kernel>(
     kern: K,
     fd: c_int,
-    buf: *const u8,
+    data: &[u8],
     seg: UioSeg,
-    len: usize,
     td: *mut K::Thread,
 ) -> Result<usize, Errno> {
     // Setup iovec.
     let mut vec = IoVec {
-        ptr: buf.cast_mut(),
-        len,
+        ptr: data.as_ptr().cast_mut(),
+        len: data.len(),
     };
 
     // Write.
@@ -92,6 +119,7 @@ impl<K: Kernel> OwnedFd<K> {
 }
 
 impl<K: Kernel> Drop for OwnedFd<K> {
+    #[inline(never)]
     fn drop(&mut self) {
         // This drop must be called from the same process as the one that created the FD.
         assert_eq!(

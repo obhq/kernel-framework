@@ -1,8 +1,11 @@
 use core::ffi::c_int;
 use core::num::NonZero;
 
+pub const EINTR: Errno = unsafe { Errno(NonZero::new_unchecked(4)) };
+pub const EIO: Errno = unsafe { Errno(NonZero::new_unchecked(5)) };
+
 /// Encapsulates an errno value.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Errno(NonZero<c_int>);
 
 impl Errno {
