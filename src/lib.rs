@@ -11,9 +11,11 @@ use self::socket::{SockAddr, Socket};
 use self::thread::Thread;
 use self::ucred::Ucred;
 use self::uio::{Uio, UioSeg};
+use core::alloc::{GlobalAlloc, Layout};
 use core::ffi::{c_char, c_int};
 use core::marker::PhantomData;
 use core::ops::Deref;
+use core::ptr::{null_mut, read_unaligned, write_unaligned};
 pub use okf_macros::*;
 
 pub mod errno;
@@ -129,6 +131,8 @@ pub trait Kernel: MappedKernel {
     /// - `auio` cannot be null.
     unsafe fn kern_writev(self, td: *mut Self::Thread, fd: c_int, auio: *mut Self::Uio) -> c_int;
 
+    /// The returned memory guarantee to be 8 byte aligment.
+    ///
     /// # Safety
     /// `ty` cannot be null.
     unsafe fn malloc(self, size: usize, ty: *mut Self::Malloc, flags: MallocFlags) -> *mut u8;
@@ -359,5 +363,82 @@ impl<T> Copy for MutableOps<T> {}
 impl<T> StaticOps for MutableOps<T> {
     fn new(value: *const u8) -> Self {
         Self(value as _)
+    }
+}
+
+/// Implementation of [`GlobalAlloc`] using `malloc` and `free` on `M_TEMP`.
+pub struct Allocator<K: Kernel>(PhantomData<K>);
+
+impl<K: Kernel> Allocator<K> {
+    pub const fn new() -> Self {
+        Self(PhantomData)
+    }
+
+    /// # Safety
+    /// `layout` must be non-zero.
+    #[inline(never)]
+    unsafe fn alloc(layout: Layout, flags: MallocFlags) -> *mut u8 {
+        // Calculate allocation size to include a spare room for align adjustment.
+        let size = if layout.align() <= 8 {
+            layout.size()
+        } else {
+            match layout.size().checked_add(layout.align() - 8) {
+                Some(v) => v,
+                None => return null_mut(),
+            }
+        };
+
+        // We will store how many bytes that we have shifted at the end.
+        let size = match size.checked_add(size_of::<usize>()) {
+            Some(v) => v,
+            None => return null_mut(),
+        };
+
+        // Allocate.
+        let k = K::default();
+        let t = k.var(K::M_TEMP);
+        let mem = k.malloc(size, t.ptr(), flags);
+
+        if mem.is_null() {
+            return null_mut();
+        }
+
+        // Get number of bytes to shift so the alignment is correct.
+        let misaligned = (mem as usize) % layout.align();
+        let adjust = if misaligned == 0 {
+            0
+        } else {
+            layout.align() - misaligned
+        };
+
+        // Store how many bytes have been shifted.
+        let mem = mem.add(adjust);
+
+        write_unaligned(mem.add(layout.size()).cast(), adjust);
+
+        mem
+    }
+}
+
+unsafe impl<K: Kernel> GlobalAlloc for Allocator<K> {
+    unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
+        Self::alloc(layout, MallocFlags::WAITOK)
+    }
+
+    #[inline(never)]
+    unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {
+        // Get original address before alignment.
+        let adjusted: usize = read_unaligned(ptr.add(layout.size()).cast());
+        let ptr = ptr.sub(adjusted);
+
+        // Free the memory.
+        let k = K::default();
+        let t = k.var(K::M_TEMP);
+
+        k.free(ptr, t.ptr());
+    }
+
+    unsafe fn alloc_zeroed(&self, layout: Layout) -> *mut u8 {
+        Self::alloc(layout, MallocFlags::WAITOK | MallocFlags::ZERO)
     }
 }

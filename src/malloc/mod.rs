@@ -9,6 +9,7 @@ bitflags! {
     #[repr(transparent)]
     #[derive(Clone, Copy)]
     pub struct MallocFlags: c_int {
-        const WAITOK = 0x0002;
+        const WAITOK = 0x2;
+        const ZERO = 0x100;
     }
 }
