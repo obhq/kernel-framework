@@ -420,6 +420,12 @@ impl<K: Kernel> Allocator<K> {
     }
 }
 
+impl<K: Kernel> Default for Allocator<K> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 unsafe impl<K: Kernel> GlobalAlloc for Allocator<K> {
     unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
         Self::alloc(layout, MallocFlags::WAITOK)
