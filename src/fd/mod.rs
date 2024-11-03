@@ -2,7 +2,7 @@ use crate::errno::Errno;
 use crate::fcntl::OpenFlags;
 use crate::pcpu::Pcpu;
 use crate::thread::Thread;
-use crate::uio::UioSeg;
+use crate::uio::{IoVec, Uio, UioRw, UioSeg};
 use crate::Kernel;
 use core::ffi::{c_char, c_int};
 use core::marker::PhantomData;
@@ -27,6 +27,33 @@ pub unsafe fn openat<K: Kernel>(
             fd: (*td).ret(0).try_into().unwrap(),
             phantom: PhantomData,
         }),
+    }
+}
+
+/// # Safety
+/// - `buf` cannot be null and must be valid up to `len` if `seg` is [`UioSeg::Kernel`].
+/// - `td` cannot be null.
+pub unsafe fn write<K: Kernel>(
+    kern: K,
+    fd: c_int,
+    buf: *const u8,
+    seg: UioSeg,
+    len: usize,
+    td: *mut K::Thread,
+) -> Result<usize, Errno> {
+    // Setup iovec.
+    let mut vec = IoVec {
+        ptr: buf.cast_mut(),
+        len,
+    };
+
+    // Write.
+    let mut uio = K::Uio::new(td, UioRw::Write, seg, &mut vec, 1).unwrap();
+    let errno = kern.kern_writev(td, fd, &mut uio);
+
+    match Errno::new(errno) {
+        Some(v) => Err(v),
+        None => Ok((*td).ret(0)),
     }
 }
 
