@@ -85,6 +85,12 @@ pub struct OwnedFd<K: Kernel> {
     phantom: PhantomData<*const ()>, // For !Send.
 }
 
+impl<K: Kernel> OwnedFd<K> {
+    pub fn as_raw_fd(&self) -> c_int {
+        self.fd
+    }
+}
+
 impl<K: Kernel> Drop for OwnedFd<K> {
     fn drop(&mut self) {
         // This drop must be called from the same process as the one that created the FD.
