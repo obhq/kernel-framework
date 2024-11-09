@@ -1,5 +1,6 @@
 use crate::queue::TailQueueEntry;
 use crate::Kernel;
+use core::ffi::c_char;
 
 /// Represents `mount` structure.
 pub trait Mount<K: Kernel>: Sized {
@@ -29,4 +30,7 @@ pub trait Mount<K: Kernel>: Sized {
 }
 
 /// Represents `vfsconf` structure.
-pub trait Filesystem: Sized {}
+pub trait Filesystem: Sized {
+    /// Returns `vfc_name`.
+    fn name(&self) -> *const c_char;
+}

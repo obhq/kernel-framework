@@ -1,5 +1,6 @@
 use crate::lock::Mtx;
 use crate::Kernel;
+use core::ffi::c_char;
 use okf::queue::TailQueueEntry;
 
 /// Implementation of [`okf::mount::Mount`] for 11.00.
@@ -38,6 +39,13 @@ impl okf::mount::Mount<Kernel> for Mount {
 
 /// Implementation of [`okf::mount::Filesystem`] for 11.00.
 #[repr(C)]
-pub struct Filesystem {}
+pub struct Filesystem {
+    pad1: [u8; 4],
+    name: [c_char; 16],
+}
 
-impl okf::mount::Filesystem for Filesystem {}
+impl okf::mount::Filesystem for Filesystem {
+    fn name(&self) -> *const c_char {
+        self.name.as_ptr()
+    }
+}
