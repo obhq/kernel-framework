@@ -55,7 +55,7 @@ pub trait Kernel: MappedKernel {
     type File: File;
     type LockObject: LockObject;
     type Malloc: Malloc;
-    type Mount: Mount;
+    type Mount: Mount<Self>;
     type Mtx: Mtx<Self>;
     type Pcpu: Pcpu<Self>;
     type Socket: Socket;
