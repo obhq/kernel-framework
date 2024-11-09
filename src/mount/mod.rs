@@ -1,6 +1,10 @@
+pub use self::fs::*;
+pub use self::stats::*;
 use crate::queue::TailQueueEntry;
 use crate::Kernel;
-use core::ffi::c_char;
+
+mod fs;
+mod stats;
 
 /// Represents `mount` structure.
 pub trait Mount<K: Kernel>: Sized {
@@ -27,10 +31,7 @@ pub trait Mount<K: Kernel>: Sized {
     /// # Safety
     /// [`Mount::mtx()`] must be locked.
     unsafe fn flags(&self) -> u64;
-}
 
-/// Represents `vfsconf` structure.
-pub trait Filesystem: Sized {
-    /// Returns `vfc_name`.
-    fn name(&self) -> *const c_char;
+    /// Returns `mnt_stat`.
+    fn stats(&self) -> *mut K::FsStats;
 }

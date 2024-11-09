@@ -4,7 +4,7 @@ use self::fd::OpenFlags;
 use self::file::File;
 use self::lock::{LockObject, Mtx};
 use self::malloc::{Malloc, MallocFlags};
-use self::mount::{Filesystem, Mount};
+use self::mount::{Filesystem, FsStats, Mount};
 use self::pcpu::Pcpu;
 use self::queue::TailQueue;
 use self::socket::{SockAddr, Socket};
@@ -55,6 +55,7 @@ pub trait Kernel: MappedKernel {
 
     type File: File;
     type Filesystem: Filesystem;
+    type FsStats: FsStats;
     type LockObject: LockObject;
     type Malloc: Malloc;
     type Mount: Mount<Self>;

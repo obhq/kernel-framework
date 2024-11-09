@@ -13,6 +13,8 @@ pub struct Mount {
     fs: *mut Filesystem,
     pad3: [u8; 0x38],
     flags: u64,
+    pad4: [u8; 0x20],
+    stats: FsStats,
 }
 
 impl okf::mount::Mount<Kernel> for Mount {
@@ -35,6 +37,10 @@ impl okf::mount::Mount<Kernel> for Mount {
     unsafe fn flags(&self) -> u64 {
         self.flags
     }
+
+    fn stats(&self) -> *mut FsStats {
+        &self.stats as *const FsStats as *mut FsStats
+    }
 }
 
 /// Implementation of [`okf::mount::Filesystem`] for 11.00.
@@ -49,3 +55,11 @@ impl okf::mount::Filesystem for Filesystem {
         self.name.as_ptr()
     }
 }
+
+/// Implementation of [`okf::mount::FsStats`] for 11.00.
+#[repr(C)]
+pub struct FsStats {
+    pad: [u8; 0x1d8],
+}
+
+impl okf::mount::FsStats for FsStats {}

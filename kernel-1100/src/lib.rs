@@ -3,7 +3,7 @@
 use self::file::File;
 use self::lock::{LockObject, Mtx};
 use self::malloc::Malloc;
-use self::mount::{Filesystem, Mount};
+use self::mount::{Filesystem, FsStats, Mount};
 use self::pcpu::Pcpu;
 use self::socket::Socket;
 use self::thread::Thread;
@@ -47,6 +47,7 @@ impl okf::Kernel for Kernel {
 
     type File = File;
     type Filesystem = Filesystem;
+    type FsStats = FsStats;
     type LockObject = LockObject;
     type Malloc = Malloc;
     type Mount = Mount;
