@@ -59,7 +59,13 @@ impl okf::mount::Filesystem for Filesystem {
 /// Implementation of [`okf::mount::FsStats`] for 11.00.
 #[repr(C)]
 pub struct FsStats {
-    pad: [u8; 0x1d8],
+    pad1: [u8; 0x128],
+    mounted_from: [c_char; 88],
+    pad2: [u8; 0x58],
 }
 
-impl okf::mount::FsStats for FsStats {}
+impl okf::mount::FsStats for FsStats {
+    fn mounted_from(&self) -> *const c_char {
+        self.mounted_from.as_ptr()
+    }
+}
