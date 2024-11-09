@@ -24,3 +24,6 @@ pub trait Mount<K: Kernel>: Sized {
     /// [`Mount::mtx()`] must be locked.
     unsafe fn flags(&self) -> u64;
 }
+
+/// Represents `vfsconf` structure.
+pub trait Filesystem: Sized {}

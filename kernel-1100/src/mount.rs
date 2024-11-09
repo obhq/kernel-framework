@@ -29,3 +29,9 @@ impl okf::mount::Mount<Kernel> for Mount {
         self.flags
     }
 }
+
+/// Implementation of [`okf::mount::Filesystem`] for 11.00.
+#[repr(C)]
+pub struct Filesystem {}
+
+impl okf::mount::Filesystem for Filesystem {}
