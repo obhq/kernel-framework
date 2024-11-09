@@ -7,4 +7,7 @@ pub trait Mount: Sized {
 
     /// Returns mutable `mnt_list`.
     fn entry_mut(&mut self) -> &mut TailQueueEntry<Self>;
+
+    /// Returns the value of `mnt_flag`.
+    fn flags(&self) -> u64;
 }

@@ -5,6 +5,8 @@ use okf::queue::TailQueueEntry;
 pub struct Mount {
     pad1: [u8; 0x28],
     entry: TailQueueEntry<Self>,
+    pad2: [u8; 0x48],
+    flags: u64,
 }
 
 impl okf::mount::Mount for Mount {
@@ -14,5 +16,9 @@ impl okf::mount::Mount for Mount {
 
     fn entry_mut(&mut self) -> &mut TailQueueEntry<Self> {
         &mut self.entry
+    }
+
+    fn flags(&self) -> u64 {
+        self.flags
     }
 }
