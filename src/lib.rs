@@ -46,6 +46,8 @@ macro_rules! kernel {
 pub trait Kernel: MappedKernel {
     const ACCEPT_MTX: StaticMut<Self::Mtx>;
     const M_TEMP: StaticMut<Self::Malloc>;
+    const MBF_MNTLSTLOCK: c_int;
+    const MBF_NOWAIT: c_int;
     const MOUNTLIST: StaticMut<TailQueue<Self::Mount>>;
     const MOUNTLIST_MTX: StaticMut<Self::Mtx>;
     const NOCPU: u32;
@@ -210,6 +212,14 @@ pub trait Kernel: MappedKernel {
     /// - `td` cannot be null.
     unsafe fn solisten(self, so: *mut Self::Socket, backlog: c_int, td: *mut Self::Thread)
         -> c_int;
+
+    /// # Safety
+    /// `mp` cannot be null.
+    unsafe fn vfs_busy(self, mp: *mut Self::Mount, flags: c_int) -> c_int;
+
+    /// # Safety
+    /// `mp` cannot be null.
+    unsafe fn vfs_unbusy(self, mp: *mut Self::Mount);
 }
 
 /// Mapped PS4 kernel in the memory.

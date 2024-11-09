@@ -36,6 +36,8 @@ impl okf::Kernel for Kernel {
     const ACCEPT_MTX: StaticMut<Self::Mtx>;
     #[offset(0x15415B0)]
     const M_TEMP: StaticMut<Self::Malloc>;
+    const MBF_MNTLSTLOCK: c_int = 2;
+    const MBF_NOWAIT: c_int = 1;
     #[offset(0x1A6AD60)]
     const MOUNTLIST: StaticMut<TailQueue<Self::Mount>>;
     #[offset(0x22D0F10)]
@@ -157,6 +159,12 @@ impl okf::Kernel for Kernel {
     #[offset(0x264620)]
     unsafe fn solisten(self, so: *mut Self::Socket, backlog: c_int, td: *mut Self::Thread)
         -> c_int;
+
+    #[offset(0x37BAF0)]
+    unsafe fn vfs_busy(self, mp: *mut Self::Mount, flags: c_int) -> c_int;
+
+    #[offset(0x37BC60)]
+    unsafe fn vfs_unbusy(self, mp: *mut Self::Mount);
 }
 
 unsafe impl Send for Kernel {}
