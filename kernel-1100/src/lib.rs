@@ -38,6 +38,7 @@ impl okf::Kernel for Kernel {
     const M_TEMP: StaticMut<Self::Malloc>;
     const MBF_MNTLSTLOCK: c_int = 2;
     const MBF_NOWAIT: c_int = 1;
+    const MNT_RDONLY: u64 = 0x0000000000000001;
     #[offset(0x1A6AD60)]
     const MOUNTLIST: StaticMut<TailQueue<Self::Mount>>;
     #[offset(0x22D0F10)]

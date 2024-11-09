@@ -48,6 +48,7 @@ pub trait Kernel: MappedKernel {
     const M_TEMP: StaticMut<Self::Malloc>;
     const MBF_MNTLSTLOCK: c_int;
     const MBF_NOWAIT: c_int;
+    const MNT_RDONLY: u64;
     const MOUNTLIST: StaticMut<TailQueue<Self::Mount>>;
     const MOUNTLIST_MTX: StaticMut<Self::Mtx>;
     const NOCPU: u32;
