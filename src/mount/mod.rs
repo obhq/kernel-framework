@@ -18,6 +18,9 @@ pub trait Mount<K: Kernel>: Sized {
     /// [`Kernel::MOUNTLIST_MTX`] must be locked.
     unsafe fn entry_mut(&mut self) -> &mut TailQueueEntry<Self>;
 
+    /// Returns `mnt_vfc`.
+    fn fs(&self) -> *mut K::Filesystem;
+
     /// Returns the value of `mnt_flag`.
     ///
     /// # Safety

@@ -8,7 +8,9 @@ pub struct Mount {
     mtx: Mtx,
     pad1: [u8; 0x8],
     entry: TailQueueEntry<Self>,
-    pad2: [u8; 0x48],
+    pad2: [u8; 8],
+    fs: *mut Filesystem,
+    pad3: [u8; 0x38],
     flags: u64,
 }
 
@@ -23,6 +25,10 @@ impl okf::mount::Mount<Kernel> for Mount {
 
     unsafe fn entry_mut(&mut self) -> &mut TailQueueEntry<Self> {
         &mut self.entry
+    }
+
+    fn fs(&self) -> *mut Filesystem {
+        self.fs
     }
 
     unsafe fn flags(&self) -> u64 {
