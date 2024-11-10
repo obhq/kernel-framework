@@ -11,6 +11,9 @@ pub trait Filesystem: Sized {
 /// Represents `vfsops` structure.
 pub trait FsOps<K: Kernel>: Sized {
     /// Invoke `vfs_root`.
+    ///
+    /// # Safety
+    /// `mp` cannot be null.
     unsafe fn root(&self, mp: *mut K::Mount, flags: c_int)
         -> Result<*mut K::Vnode, NonZero<c_int>>;
 }
