@@ -9,8 +9,8 @@ pub struct Vnode {
 }
 
 impl okf::vnode::Vnode<Kernel> for Vnode {
-    fn ops(&self) -> &'static VopVector {
-        unsafe { &*self.ops }
+    fn ops(&self) -> *mut VopVector {
+        self.ops
     }
 }
 

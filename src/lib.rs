@@ -234,6 +234,11 @@ pub trait Kernel: MappedKernel {
     /// # Safety
     /// `mp` cannot be null.
     unsafe fn vfs_unbusy(self, mp: *mut Self::Mount);
+
+    /// # Safety
+    /// - `vec` cannot be null.
+    /// - `args` cannot be null.
+    unsafe fn vop_unlock(self, vec: *mut Self::VopVector, args: *mut Self::VopUnlock) -> c_int;
 }
 
 /// Mapped PS4 kernel in the memory.
