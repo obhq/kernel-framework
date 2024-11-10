@@ -10,6 +10,7 @@ use self::thread::Thread;
 use self::ucred::Ucred;
 use self::uio::Uio;
 use core::ffi::{c_char, c_int};
+use core::num::NonZero;
 use okf::fd::OpenFlags;
 use okf::malloc::MallocFlags;
 use okf::queue::TailQueue;
@@ -34,6 +35,8 @@ pub struct Kernel(*const u8);
 impl okf::Kernel for Kernel {
     #[offset(0x221CCF8)]
     const ACCEPT_MTX: StaticMut<Self::Mtx>;
+    const EINTR: NonZero<c_int> = unsafe { NonZero::new_unchecked(4) };
+    const EIO: NonZero<c_int> = unsafe { NonZero::new_unchecked(5) };
     #[offset(0x15415B0)]
     const M_TEMP: StaticMut<Self::Malloc>;
     const MBF_MNTLSTLOCK: c_int = 2;

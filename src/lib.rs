@@ -14,6 +14,7 @@ use self::uio::{Uio, UioSeg};
 use core::alloc::{GlobalAlloc, Layout};
 use core::ffi::{c_char, c_int};
 use core::marker::PhantomData;
+use core::num::NonZero;
 use core::ops::Deref;
 use core::ptr::{null_mut, read_unaligned, write_unaligned};
 pub use okf_macros::*;
@@ -45,6 +46,8 @@ macro_rules! kernel {
 /// Some modules may provide high-level wrappers that are easy to use.
 pub trait Kernel: MappedKernel {
     const ACCEPT_MTX: StaticMut<Self::Mtx>;
+    const EINTR: NonZero<c_int>;
+    const EIO: NonZero<c_int>;
     const M_TEMP: StaticMut<Self::Malloc>;
     const MBF_MNTLSTLOCK: c_int;
     const MBF_NOWAIT: c_int;
