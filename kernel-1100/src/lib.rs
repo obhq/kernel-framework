@@ -186,11 +186,11 @@ impl okf::Kernel for Kernel {
     #[offset(0x37BC60)]
     unsafe fn vfs_unbusy(self, mp: *mut Self::Mount);
 
-    #[offset(0x37E9B0)]
-    unsafe fn vput(self, vp: *mut Self::Vnode);
-
     #[offset(0x1300A0)]
     unsafe fn vop_unlock(self, vec: *mut Self::VopVector, args: *mut Self::VopUnlock) -> c_int;
+
+    #[offset(0x37E9B0)]
+    unsafe fn vput(self, vp: *mut Self::Vnode);
 }
 
 unsafe impl Send for Kernel {}
