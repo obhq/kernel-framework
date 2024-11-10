@@ -57,6 +57,7 @@ pub trait Kernel: MappedKernel {
     const MOUNTLIST: StaticMut<TailQueue<Self::Mount>>;
     const MOUNTLIST_MTX: StaticMut<Self::Mtx>;
     const NOCPU: u32;
+    const VOP_UNLOCK: StaticMut<Self::VnodeOp>;
 
     type File: File;
     type Filesystem: Filesystem;
