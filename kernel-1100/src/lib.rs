@@ -39,6 +39,7 @@ impl okf::Kernel for Kernel {
     const ACCEPT_MTX: StaticMut<Self::Mtx>;
     const EINTR: NonZero<c_int> = unsafe { NonZero::new_unchecked(4) };
     const EIO: NonZero<c_int> = unsafe { NonZero::new_unchecked(5) };
+    const LK_EXCLUSIVE: c_int = 0x80000;
     #[offset(0x15415B0)]
     const M_TEMP: StaticMut<Self::Malloc>;
     const MBF_MNTLSTLOCK: c_int = 2;

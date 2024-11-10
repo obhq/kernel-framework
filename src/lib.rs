@@ -50,6 +50,7 @@ pub trait Kernel: MappedKernel {
     const ACCEPT_MTX: StaticMut<Self::Mtx>;
     const EINTR: NonZero<c_int>;
     const EIO: NonZero<c_int>;
+    const LK_EXCLUSIVE: c_int;
     const M_TEMP: StaticMut<Self::Malloc>;
     const MBF_MNTLSTLOCK: c_int;
     const MBF_NOWAIT: c_int;
