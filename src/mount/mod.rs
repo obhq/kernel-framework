@@ -26,6 +26,9 @@ pub trait Mount<K: Kernel>: Sized {
     /// Returns `mnt_vfc`.
     fn fs(&self) -> *mut K::Filesystem;
 
+    /// Returns `mnt_op`.
+    fn ops(&self) -> &'static K::FsOps;
+
     /// Returns the value of `mnt_flag`.
     ///
     /// # Safety

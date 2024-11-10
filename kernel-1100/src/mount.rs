@@ -1,6 +1,9 @@
 use crate::lock::Mtx;
+use crate::vnode::Vnode;
 use crate::Kernel;
-use core::ffi::c_char;
+use core::ffi::{c_char, c_int};
+use core::mem::MaybeUninit;
+use core::num::NonZero;
 use okf::queue::TailQueueEntry;
 
 /// Implementation of [`okf::mount::Mount`] for 11.00.
@@ -9,7 +12,7 @@ pub struct Mount {
     mtx: Mtx,
     pad1: [u8; 0x8],
     entry: TailQueueEntry<Self>,
-    pad2: [u8; 8],
+    ops: *const FsOps,
     fs: *mut Filesystem,
     pad3: [u8; 0x38],
     flags: u64,
@@ -34,6 +37,10 @@ impl okf::mount::Mount<Kernel> for Mount {
         self.fs
     }
 
+    fn ops(&self) -> &'static FsOps {
+        unsafe { &*self.ops }
+    }
+
     unsafe fn flags(&self) -> u64 {
         self.flags
     }
@@ -53,6 +60,25 @@ pub struct Filesystem {
 impl okf::mount::Filesystem for Filesystem {
     fn name(&self) -> *const c_char {
         self.name.as_ptr()
+    }
+}
+
+/// Implementation of [`okf::mount::FsOps`] for 11.00.
+#[repr(C)]
+pub struct FsOps {
+    pad1: [u8; 0x18],
+    root: unsafe extern "C" fn(*mut Mount, c_int, *mut *mut Vnode) -> c_int,
+}
+
+impl okf::mount::FsOps<Kernel> for FsOps {
+    unsafe fn root(&self, mp: *mut Mount, flags: c_int) -> Result<*mut Vnode, NonZero<c_int>> {
+        let mut vp = MaybeUninit::uninit();
+        let errno = (self.root)(mp, flags, vp.as_mut_ptr());
+
+        match NonZero::new(errno) {
+            Some(v) => Err(v),
+            None => Ok(vp.assume_init()),
+        }
     }
 }
 
