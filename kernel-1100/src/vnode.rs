@@ -1,3 +1,5 @@
+use crate::ucred::Ucred;
+use crate::uio::Uio;
 use crate::Kernel;
 use core::ffi::c_int;
 
@@ -35,3 +37,33 @@ pub struct VopUnlock {
 }
 
 impl okf::vnode::VopUnlock for VopUnlock {}
+
+/// Implementation of [`okf::vnode::VopRead`] for 11.00.
+#[repr(C)]
+pub struct VopRead {
+    desc: *mut VnodeOp,
+    vp: *mut Vnode,
+    uio: *mut Uio,
+    flags: c_int,
+    cred: *mut Ucred,
+}
+
+impl okf::vnode::VopRead<Kernel> for VopRead {
+    unsafe fn new(
+        k: Kernel,
+        vp: *mut Vnode,
+        uio: *mut Uio,
+        flags: c_int,
+        cred: *mut Ucred,
+    ) -> Self {
+        use okf::Kernel;
+
+        Self {
+            desc: k.var(crate::Kernel::VOP_READ).ptr(),
+            vp,
+            uio,
+            flags,
+            cred,
+        }
+    }
+}

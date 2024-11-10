@@ -11,7 +11,7 @@ use self::socket::{SockAddr, Socket};
 use self::thread::Thread;
 use self::ucred::Ucred;
 use self::uio::{Uio, UioSeg};
-use self::vnode::{Vnode, VnodeOp, VopUnlock, VopVector};
+use self::vnode::{Vnode, VnodeOp, VopRead, VopUnlock, VopVector};
 use core::alloc::{GlobalAlloc, Layout};
 use core::ffi::{c_char, c_int};
 use core::marker::PhantomData;
@@ -77,6 +77,7 @@ pub trait Kernel: MappedKernel {
     type Uio: Uio<Self>;
     type Vnode: Vnode<Self>;
     type VnodeOp: VnodeOp;
+    type VopRead: VopRead<Self>;
     type VopUnlock: VopUnlock;
     type VopVector: VopVector;
 
