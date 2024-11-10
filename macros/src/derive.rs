@@ -37,21 +37,21 @@ pub fn mapped_kernel(item: ItemStruct) -> syn::Result<TokenStream> {
         impl Default for #ident {
             fn default() -> Self {
                 // Read LSTAR register.
-                let mut edx = 0u32;
-                let mut eax = 0u32;
+                let mut rdx: usize;
+                let mut rax: usize;
 
                 unsafe {
                     core::arch::asm!(
                         "rdmsr",
                         in("ecx") 0xc0000082u32,
-                        out("edx") edx,
-                        out("eax") eax,
+                        out("rdx") rdx, // Use 64-bits version to suppress "mov edx, edx".
+                        out("rax") rax, // Same here.
                         options(pure, nomem, preserves_flags, nostack)
                     );
                 }
 
                 // Get base address of the kernel.
-                let aslr = ((edx as usize) << 32 | (eax as usize)) - 0xffffffff822001c0;
+                let aslr = ((rdx << 32) | rax) - 0xffffffff822001c0;
                 let base = aslr + 0xffffffff82200000;
 
                 Self(base as *const u8)
