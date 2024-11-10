@@ -11,7 +11,7 @@ use self::socket::{SockAddr, Socket};
 use self::thread::Thread;
 use self::ucred::Ucred;
 use self::uio::{Uio, UioSeg};
-use self::vnode::Vnode;
+use self::vnode::{Vnode, VnodeOp};
 use core::alloc::{GlobalAlloc, Layout};
 use core::ffi::{c_char, c_int};
 use core::marker::PhantomData;
@@ -72,6 +72,7 @@ pub trait Kernel: MappedKernel {
     type Ucred: Ucred;
     type Uio: Uio<Self>;
     type Vnode: Vnode;
+    type VnodeOp: VnodeOp;
 
     fn var<O: StaticOff>(self, off: O) -> O::Ops {
         let value = unsafe { self.addr().add(off.value()) };
