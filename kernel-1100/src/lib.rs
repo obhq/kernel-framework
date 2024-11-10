@@ -9,6 +9,7 @@ use self::socket::Socket;
 use self::thread::Thread;
 use self::ucred::Ucred;
 use self::uio::Uio;
+use self::vnode::Vnode;
 use core::ffi::{c_char, c_int};
 use core::num::NonZero;
 use okf::fd::OpenFlags;
@@ -27,6 +28,7 @@ mod socket;
 mod thread;
 mod ucred;
 mod uio;
+mod vnode;
 
 /// Implementation of [`okf::Kernel`] for 11.00.
 #[derive(Clone, Copy, MappedKernel)]
@@ -60,6 +62,7 @@ impl okf::Kernel for Kernel {
     type Thread = Thread;
     type Ucred = Ucred;
     type Uio = Uio;
+    type Vnode = Vnode;
 
     #[offset(0x419040)]
     unsafe fn fget(
