@@ -238,6 +238,10 @@ pub trait Kernel: MappedKernel {
     unsafe fn vfs_unbusy(self, mp: *mut Self::Mount);
 
     /// # Safety
+    /// `vp` cannot be null and must be locked.
+    unsafe fn vput(self, vp: *mut Self::Vnode);
+
+    /// # Safety
     /// - `vec` cannot be null.
     /// - `args` cannot be null.
     unsafe fn vop_unlock(self, vec: *mut Self::VopVector, args: *mut Self::VopUnlock) -> c_int;
