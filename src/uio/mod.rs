@@ -25,6 +25,9 @@ pub trait Uio<K: Kernel>: Sized {
     fn io_max() -> usize {
         0x7fffffff
     }
+
+    /// Returns `uio_resid`.
+    fn remaining(&self) -> isize;
 }
 
 /// Represents `uio_seg` enum.

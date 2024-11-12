@@ -51,4 +51,8 @@ impl okf::uio::Uio<Kernel> for Uio {
             td,
         })
     }
+
+    fn remaining(&self) -> isize {
+        self.res
+    }
 }
