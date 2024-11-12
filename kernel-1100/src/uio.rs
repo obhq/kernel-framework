@@ -52,6 +52,10 @@ impl okf::uio::Uio<Kernel> for Uio {
         })
     }
 
+    fn offset(&self) -> isize {
+        self.off
+    }
+
     fn remaining(&self) -> isize {
         self.res
     }

@@ -26,6 +26,9 @@ pub trait Uio<K: Kernel>: Sized {
         0x7fffffff
     }
 
+    /// Returns `uio_offset`.
+    fn offset(&self) -> isize;
+
     /// Returns `uio_resid`.
     fn remaining(&self) -> isize;
 }
