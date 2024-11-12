@@ -75,7 +75,7 @@ pub unsafe fn write<K: Kernel>(
     };
 
     // Write.
-    let mut uio = K::Uio::write(td, &mut vec).unwrap();
+    let mut uio = K::Uio::write(&mut vec, td).unwrap();
     let errno = kern.kern_writev(td, fd, &mut uio);
 
     match NonZero::new(errno) {

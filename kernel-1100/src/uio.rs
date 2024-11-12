@@ -16,7 +16,7 @@ pub struct Uio {
 }
 
 impl okf::uio::Uio<Kernel> for Uio {
-    unsafe fn write(td: *mut Thread, iov: *mut IoVec) -> Option<Self> {
+    unsafe fn write(iov: *mut IoVec, td: *mut Thread) -> Option<Self> {
         let res = (*iov).len;
 
         if res > Self::io_max() {
@@ -34,7 +34,7 @@ impl okf::uio::Uio<Kernel> for Uio {
         })
     }
 
-    unsafe fn read(td: *mut Thread, iov: *mut IoVec) -> Option<Self> {
+    unsafe fn read(iov: *mut IoVec, off: usize, td: *mut Thread) -> Option<Self> {
         let res = (*iov).len;
 
         if res > Self::io_max() {
@@ -44,7 +44,7 @@ impl okf::uio::Uio<Kernel> for Uio {
         Some(Self {
             iov,
             len: 1,
-            off: 0,
+            off: off.try_into().unwrap(),
             res: res.try_into().unwrap(),
             seg: UioSeg::Kernel,
             op: UioRw::Read,
