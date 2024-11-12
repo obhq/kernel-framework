@@ -53,6 +53,8 @@ impl okf::Kernel for Kernel {
     const NOCPU: u32 = 0xff;
     #[offset(0x1531F70)]
     const VOP_READ: StaticMut<Self::VnodeOp>;
+    #[offset(0x1533A00)]
+    const VOP_READDIR: StaticMut<Self::VnodeOp>;
     #[offset(0x1534360)]
     const VOP_UNLOCK: StaticMut<Self::VnodeOp>;
 
