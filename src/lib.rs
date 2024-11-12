@@ -58,6 +58,7 @@ pub trait Kernel: MappedKernel {
     const MOUNTLIST: StaticMut<TailQueue<Self::Mount>>;
     const MOUNTLIST_MTX: StaticMut<Self::Mtx>;
     const NOCPU: u32;
+    const VDIR: c_int;
     const VOP_READ: StaticMut<Self::VnodeOp>;
     const VOP_READDIR: StaticMut<Self::VnodeOp>;
     const VOP_UNLOCK: StaticMut<Self::VnodeOp>;

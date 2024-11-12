@@ -51,6 +51,7 @@ impl okf::Kernel for Kernel {
     #[offset(0x22D0F10)]
     const MOUNTLIST_MTX: StaticMut<Self::Mtx>;
     const NOCPU: u32 = 0xff;
+    const VDIR: c_int = 2;
     #[offset(0x1531F70)]
     const VOP_READ: StaticMut<Self::VnodeOp>;
     #[offset(0x1533A00)]
