@@ -1,6 +1,6 @@
 use crate::pcpu::Pcpu;
 use crate::thread::Thread;
-use crate::uio::{IoVec, Uio, UioRw, UioSeg};
+use crate::uio::{IoVec, Uio, UioSeg};
 use crate::Kernel;
 use bitflags::bitflags;
 use core::ffi::{c_char, c_int};
@@ -40,11 +40,10 @@ pub unsafe fn write_all<K: Kernel>(
     kern: K,
     fd: c_int,
     mut data: &[u8],
-    seg: UioSeg,
     td: *mut K::Thread,
 ) -> Result<(), NonZero<c_int>> {
     while !data.is_empty() {
-        let written = match write(kern, fd, data, seg, td) {
+        let written = match write(kern, fd, data, td) {
             Ok(v) => v,
             Err(e) if e == K::EINTR => continue,
             Err(e) => return Err(e),
@@ -67,7 +66,6 @@ pub unsafe fn write<K: Kernel>(
     kern: K,
     fd: c_int,
     data: &[u8],
-    seg: UioSeg,
     td: *mut K::Thread,
 ) -> Result<usize, NonZero<c_int>> {
     // Setup iovec.
@@ -77,7 +75,7 @@ pub unsafe fn write<K: Kernel>(
     };
 
     // Write.
-    let mut uio = K::Uio::new(td, UioRw::Write, seg, &mut vec, 1).unwrap();
+    let mut uio = K::Uio::write(td, &mut vec).unwrap();
     let errno = kern.kern_writev(td, fd, &mut uio);
 
     match NonZero::new(errno) {

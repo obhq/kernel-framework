@@ -16,24 +16,8 @@ pub struct Uio {
 }
 
 impl okf::uio::Uio<Kernel> for Uio {
-    unsafe fn new(
-        td: *mut Thread,
-        op: UioRw,
-        seg: UioSeg,
-        iov: *mut IoVec,
-        len: usize,
-    ) -> Option<Self> {
-        // Check vec count.
-        if len > Self::vec_max() {
-            return None;
-        }
-
-        // Get total length.
-        let mut res = 0usize;
-
-        for i in 0..len {
-            res = res.checked_add((*iov.add(i)).len)?;
-        }
+    unsafe fn write(td: *mut Thread, iov: *mut IoVec) -> Option<Self> {
+        let res = (*iov).len;
 
         if res > Self::io_max() {
             return None;
@@ -41,11 +25,11 @@ impl okf::uio::Uio<Kernel> for Uio {
 
         Some(Self {
             iov,
-            len: len.try_into().unwrap(),
+            len: 1,
             off: -1,
             res: res.try_into().unwrap(),
-            seg,
-            op,
+            seg: UioSeg::Kernel,
+            op: UioRw::Write,
             td,
         })
     }
