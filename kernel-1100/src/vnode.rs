@@ -6,11 +6,16 @@ use okf::Kernel;
 /// Implementation of [`okf::vnode::Vnode`] for 11.00.
 #[repr(C)]
 pub struct Vnode {
-    pad1: [u8; 0x10],
+    ty: c_int,
+    pad1: [u8; 0xC],
     ops: *mut VopVector,
 }
 
 impl okf::vnode::Vnode<crate::Kernel> for Vnode {
+    fn ty(&self) -> c_int {
+        self.ty
+    }
+
     fn ops(&self) -> *mut VopVector {
         self.ops
     }
