@@ -21,3 +21,20 @@ pub trait VopRead<K: Kernel>: Sized {
         cred: *mut K::Ucred,
     ) -> Self;
 }
+
+/// Represents `vop_readdir_args` structure.
+pub trait VopReadDir<K: Kernel>: Sized {
+    /// # Safety
+    /// - `vp` cannot be null and must be locked.
+    /// - `uio` cannot be null.
+    /// - `cred` cannot be null.
+    unsafe fn new(
+        k: K,
+        vp: *mut K::Vnode,
+        uio: *mut K::Uio,
+        cred: *mut K::Ucred,
+        eof: *mut c_int,
+        ncookies: *mut c_int,
+        cookies: *mut *mut u64,
+    ) -> Self;
+}

@@ -1,7 +1,7 @@
 use crate::ucred::Ucred;
 use crate::uio::Uio;
-use crate::Kernel;
 use core::ffi::c_int;
+use okf::Kernel;
 
 /// Implementation of [`okf::vnode::Vnode`] for 11.00.
 #[repr(C)]
@@ -10,7 +10,7 @@ pub struct Vnode {
     ops: *mut VopVector,
 }
 
-impl okf::vnode::Vnode<Kernel> for Vnode {
+impl okf::vnode::Vnode<crate::Kernel> for Vnode {
     fn ops(&self) -> *mut VopVector {
         self.ops
     }
@@ -48,22 +48,54 @@ pub struct VopRead {
     cred: *mut Ucred,
 }
 
-impl okf::vnode::VopRead<Kernel> for VopRead {
+impl okf::vnode::VopRead<crate::Kernel> for VopRead {
     unsafe fn new(
-        k: Kernel,
+        k: crate::Kernel,
         vp: *mut Vnode,
         uio: *mut Uio,
         flags: c_int,
         cred: *mut Ucred,
     ) -> Self {
-        use okf::Kernel;
-
         Self {
             desc: k.var(crate::Kernel::VOP_READ).ptr(),
             vp,
             uio,
             flags,
             cred,
+        }
+    }
+}
+
+/// Implementation of [`okf::vnode::VopReadDir`] for 11.00.
+#[repr(C)]
+pub struct VopReadDir {
+    desc: *mut VnodeOp,
+    vp: *mut Vnode,
+    uio: *mut Uio,
+    cred: *mut Ucred,
+    eof: *mut c_int,
+    ncookies: *mut c_int,
+    cookies: *mut *mut u64,
+}
+
+impl okf::vnode::VopReadDir<crate::Kernel> for VopReadDir {
+    unsafe fn new(
+        k: crate::Kernel,
+        vp: *mut Vnode,
+        uio: *mut Uio,
+        cred: *mut Ucred,
+        eof: *mut c_int,
+        ncookies: *mut c_int,
+        cookies: *mut *mut u64,
+    ) -> Self {
+        Self {
+            desc: k.var(crate::Kernel::VOP_READDIR).ptr(),
+            vp,
+            uio,
+            cred,
+            eof,
+            ncookies,
+            cookies,
         }
     }
 }
