@@ -33,4 +33,22 @@ impl okf::uio::Uio<Kernel> for Uio {
             td,
         })
     }
+
+    unsafe fn read(td: *mut Thread, iov: *mut IoVec) -> Option<Self> {
+        let res = (*iov).len;
+
+        if res > Self::io_max() {
+            return None;
+        }
+
+        Some(Self {
+            iov,
+            len: 1,
+            off: 0,
+            res: res.try_into().unwrap(),
+            seg: UioSeg::Kernel,
+            op: UioRw::Read,
+            td,
+        })
+    }
 }

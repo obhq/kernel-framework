@@ -9,6 +9,13 @@ pub trait Uio<K: Kernel>: Sized {
     /// - `iov` cannot be null.
     unsafe fn write(td: *mut K::Thread, iov: *mut IoVec) -> Option<Self>;
 
+    /// Returns [`None`] if [`IoVec::len`] of `iov` is greater than [`Uio::io_max()`].
+    ///
+    /// # Safety
+    /// - `td` cannot be null.
+    /// - `iov` cannot be null.
+    unsafe fn read(td: *mut K::Thread, iov: *mut IoVec) -> Option<Self>;
+
     /// Returns value of `UIO_MAXIOV`.
     fn vec_max() -> usize {
         1024
