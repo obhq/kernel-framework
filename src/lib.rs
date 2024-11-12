@@ -20,7 +20,6 @@ use core::ops::Deref;
 use core::ptr::{null_mut, read_unaligned, write_unaligned};
 pub use okf_macros::*;
 
-pub mod errno;
 pub mod fd;
 pub mod file;
 pub mod lock;

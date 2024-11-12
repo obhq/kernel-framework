@@ -1,4 +1,3 @@
-use crate::errno::Errno;
 use crate::pcpu::Pcpu;
 use crate::thread::Thread;
 use crate::uio::{IoVec, Uio, UioRw, UioSeg};
@@ -20,11 +19,11 @@ pub unsafe fn openat<K: Kernel>(
     seg: UioSeg,
     flags: OpenFlags,
     mode: c_int,
-) -> Result<OwnedFd<K>, Errno> {
+) -> Result<OwnedFd<K>, NonZero<c_int>> {
     let td = K::Pcpu::curthread();
     let errno = kern.kern_openat(td, fd, path, seg, flags, mode);
 
-    match Errno::new(errno) {
+    match NonZero::new(errno) {
         Some(v) => Err(v),
         None => Ok(OwnedFd {
             kern,
