@@ -249,6 +249,11 @@ pub trait Kernel: MappedKernel {
     /// # Safety
     /// - `vec` cannot be null.
     /// - `args` cannot be null.
+    unsafe fn vop_readdir(self, vec: *mut Self::VopVector, args: *mut Self::VopReadDir) -> c_int;
+
+    /// # Safety
+    /// - `vec` cannot be null.
+    /// - `args` cannot be null.
     unsafe fn vop_unlock(self, vec: *mut Self::VopVector, args: *mut Self::VopUnlock) -> c_int;
 
     /// # Safety

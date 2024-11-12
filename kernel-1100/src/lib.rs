@@ -193,6 +193,9 @@ impl okf::Kernel for Kernel {
     #[offset(0x12E7E0)]
     unsafe fn vop_read(self, vec: *mut Self::VopVector, args: *mut Self::VopRead) -> c_int;
 
+    #[offset(0x12FB00)]
+    unsafe fn vop_readdir(self, vec: *mut Self::VopVector, args: *mut Self::VopReadDir) -> c_int;
+
     #[offset(0x1300A0)]
     unsafe fn vop_unlock(self, vec: *mut Self::VopVector, args: *mut Self::VopUnlock) -> c_int;
 
