@@ -41,6 +41,7 @@ impl okf::Kernel for Kernel {
     const EIO: NonZero<c_int> = unsafe { NonZero::new_unchecked(5) };
     const LK_EXCLUSIVE: c_int = 0x80000;
     const LK_SHARED: c_int = 0x200000;
+    const LOOKUP: u64 = 0;
     #[offset(0x15415B0)]
     const M_TEMP: StaticMut<Self::Malloc>;
     const MBF_MNTLSTLOCK: c_int = 2;

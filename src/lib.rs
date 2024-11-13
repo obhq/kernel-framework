@@ -51,6 +51,7 @@ pub trait Kernel: MappedKernel {
     const EIO: NonZero<c_int>;
     const LK_EXCLUSIVE: c_int;
     const LK_SHARED: c_int;
+    const LOOKUP: u64;
     const M_TEMP: StaticMut<Self::Malloc>;
     const MBF_MNTLSTLOCK: c_int;
     const MBF_NOWAIT: c_int;
