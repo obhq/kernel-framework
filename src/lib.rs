@@ -235,6 +235,10 @@ pub trait Kernel: MappedKernel {
         -> c_int;
 
     /// # Safety
+    /// `s` cannot be null and must point to a null-terminated string.
+    unsafe fn strlen(self, s: *const c_char) -> usize;
+
+    /// # Safety
     /// `mp` cannot be null.
     unsafe fn vfs_busy(self, mp: *mut Self::Mount, flags: c_int) -> c_int;
 

@@ -185,6 +185,9 @@ impl okf::Kernel for Kernel {
     unsafe fn solisten(self, so: *mut Self::Socket, backlog: c_int, td: *mut Self::Thread)
         -> c_int;
 
+    #[offset(0x21DC40)]
+    unsafe fn strlen(self, s: *const c_char) -> usize;
+
     #[offset(0x37BAF0)]
     unsafe fn vfs_busy(self, mp: *mut Self::Mount, flags: c_int) -> c_int;
 
