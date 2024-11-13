@@ -5,6 +5,7 @@ use self::file::File;
 use self::lock::{LockObject, Mtx};
 use self::malloc::{Malloc, MallocFlags};
 use self::mount::{Filesystem, FsOps, FsStats, Mount};
+use self::namei::ComponentName;
 use self::pcpu::Pcpu;
 use self::queue::TailQueue;
 use self::socket::{SockAddr, Socket};
@@ -25,6 +26,7 @@ pub mod file;
 pub mod lock;
 pub mod malloc;
 pub mod mount;
+pub mod namei;
 pub mod pcpu;
 pub mod queue;
 pub mod socket;
@@ -64,6 +66,7 @@ pub trait Kernel: MappedKernel {
     const VOP_READDIR: StaticMut<Self::VnodeOp>;
     const VOP_UNLOCK: StaticMut<Self::VnodeOp>;
 
+    type ComponentName: ComponentName<Self>;
     type File: File;
     type Filesystem: Filesystem;
     type FsOps: FsOps<Self>;

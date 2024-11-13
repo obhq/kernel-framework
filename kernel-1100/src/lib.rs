@@ -4,6 +4,7 @@ use self::file::File;
 use self::lock::{LockObject, Mtx};
 use self::malloc::Malloc;
 use self::mount::{Filesystem, FsOps, FsStats, Mount};
+use self::namei::ComponentName;
 use self::pcpu::Pcpu;
 use self::socket::Socket;
 use self::thread::Thread;
@@ -23,6 +24,7 @@ mod file;
 mod lock;
 mod malloc;
 mod mount;
+mod namei;
 mod pcpu;
 mod socket;
 mod thread;
@@ -60,6 +62,7 @@ impl okf::Kernel for Kernel {
     #[offset(0x1534360)]
     const VOP_UNLOCK: StaticMut<Self::VnodeOp>;
 
+    type ComponentName = ComponentName;
     type File = File;
     type Filesystem = Filesystem;
     type FsOps = FsOps;
