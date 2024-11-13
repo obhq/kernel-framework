@@ -1,3 +1,4 @@
+use crate::namei::ComponentName;
 use crate::ucred::Ucred;
 use crate::uio::Uio;
 use core::ffi::c_int;
@@ -101,6 +102,31 @@ impl okf::vnode::VopReadDir<crate::Kernel> for VopReadDir {
             eof,
             ncookies,
             cookies,
+        }
+    }
+}
+
+/// Implementation of [`okf::vnode::VopLookup`] for 11.00.
+#[repr(C)]
+pub struct VopLookup {
+    desc: *mut VnodeOp,
+    vp: *mut Vnode,
+    out: *mut *mut Vnode,
+    cn: *mut ComponentName,
+}
+
+impl okf::vnode::VopLookup<crate::Kernel> for VopLookup {
+    unsafe fn new(
+        k: crate::Kernel,
+        vp: *mut Vnode,
+        out: *mut *mut Vnode,
+        cn: *mut ComponentName,
+    ) -> Self {
+        Self {
+            desc: k.var(crate::Kernel::VOP_LOOKUP).ptr(),
+            vp,
+            out,
+            cn,
         }
     }
 }

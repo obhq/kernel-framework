@@ -38,3 +38,17 @@ pub trait VopReadDir<K: Kernel>: Sized {
         cookies: *mut *mut u64,
     ) -> Self;
 }
+
+/// Represents `vop_lookup_args` structure.
+pub trait VopLookup<K: Kernel>: Sized {
+    /// # Safety
+    /// - `vp` cannot be null and must be locked.
+    /// - `out` cannot be null.
+    /// - `cn` cannot be null.
+    unsafe fn new(
+        k: K,
+        vp: *mut K::Vnode,
+        out: *mut *mut K::Vnode,
+        cn: *mut K::ComponentName,
+    ) -> Self;
+}
