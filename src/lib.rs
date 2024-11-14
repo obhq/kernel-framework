@@ -27,6 +27,7 @@ pub mod lock;
 pub mod malloc;
 pub mod mount;
 pub mod namei;
+pub mod notification;
 pub mod pcpu;
 pub mod queue;
 pub mod socket;
