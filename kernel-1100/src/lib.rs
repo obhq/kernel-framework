@@ -63,6 +63,7 @@ impl okf::Kernel for Kernel {
     const VOP_READDIR: StaticMut<Self::VnodeOp>;
     #[offset(0x1534360)]
     const VOP_UNLOCK: StaticMut<Self::VnodeOp>;
+    const VREG: c_int = 1;
 
     type ComponentName = ComponentName;
     type File = File;

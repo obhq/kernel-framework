@@ -67,6 +67,7 @@ pub trait Kernel: MappedKernel {
     const VOP_READ: StaticMut<Self::VnodeOp>;
     const VOP_READDIR: StaticMut<Self::VnodeOp>;
     const VOP_UNLOCK: StaticMut<Self::VnodeOp>;
+    const VREG: c_int;
 
     type ComponentName: ComponentName<Self>;
     type File: File;
