@@ -1,7 +1,7 @@
+use crate::Kernel;
 use crate::pcpu::Pcpu;
 use crate::thread::Thread;
 use crate::uio::{IoVec, Uio, UioSeg};
-use crate::Kernel;
 use bitflags::bitflags;
 use core::ffi::{c_char, c_int};
 use core::marker::PhantomData;
@@ -21,13 +21,13 @@ pub unsafe fn openat<K: Kernel>(
     mode: c_int,
 ) -> Result<OwnedFd<K>, NonZero<c_int>> {
     let td = K::Pcpu::curthread();
-    let errno = kern.kern_openat(td, fd, path, seg, flags, mode);
+    let errno = unsafe { kern.kern_openat(td, fd, path, seg, flags, mode) };
 
     match NonZero::new(errno) {
         Some(v) => Err(v),
         None => Ok(OwnedFd {
             kern,
-            fd: (*td).ret(0).try_into().unwrap(),
+            fd: unsafe { (*td).ret(0).try_into().unwrap() },
             phantom: PhantomData,
         }),
     }
@@ -43,7 +43,7 @@ pub unsafe fn write_all<K: Kernel>(
     td: *mut K::Thread,
 ) -> Result<(), NonZero<c_int>> {
     while !data.is_empty() {
-        let written = match write(kern, fd, data, td) {
+        let written = match unsafe { write(kern, fd, data, td) } {
             Ok(v) => v,
             Err(e) if e == K::EINTR => continue,
             Err(e) => return Err(e),
@@ -75,12 +75,12 @@ pub unsafe fn write<K: Kernel>(
     };
 
     // Write.
-    let mut uio = K::Uio::write(&mut vec, td).unwrap();
-    let errno = kern.kern_writev(td, fd, &mut uio);
+    let mut uio = unsafe { K::Uio::write(&mut vec, td).unwrap() };
+    let errno = unsafe { kern.kern_writev(td, fd, &mut uio) };
 
     match NonZero::new(errno) {
         Some(v) => Err(v),
-        None => Ok((*td).ret(0)),
+        None => Ok(unsafe { (*td).ret(0) }),
     }
 }
 

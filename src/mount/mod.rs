@@ -1,7 +1,7 @@
 pub use self::fs::*;
 pub use self::stats::*;
-use crate::queue::TailQueueEntry;
 use crate::Kernel;
+use crate::queue::TailQueueEntry;
 
 mod fs;
 mod stats;

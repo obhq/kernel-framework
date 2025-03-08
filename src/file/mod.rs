@@ -1,9 +1,9 @@
-use crate::pcpu::Pcpu;
 use crate::Kernel;
+use crate::pcpu::Pcpu;
 use core::ffi::c_int;
 use core::num::NonZero;
 use core::ptr::null_mut;
-use core::sync::atomic::{fence, AtomicU32, Ordering};
+use core::sync::atomic::{AtomicU32, Ordering, fence};
 
 /// Represents `file` structure.
 pub trait File: Sized {

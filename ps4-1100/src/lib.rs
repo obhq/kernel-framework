@@ -18,7 +18,7 @@ use okf::malloc::MallocFlags;
 use okf::queue::TailQueue;
 use okf::socket::SockAddr;
 use okf::uio::UioSeg;
-use okf::{offset, panic_handler, MappedKernel, StaticMut};
+use okf::{MappedKernel, StaticMut, offset, panic_handler};
 
 mod file;
 mod lock;
@@ -190,7 +190,7 @@ impl okf::Kernel for Kernel {
 
     #[offset(0x264620)]
     unsafe fn solisten(self, so: *mut Self::Socket, backlog: c_int, td: *mut Self::Thread)
-        -> c_int;
+    -> c_int;
 
     #[offset(0x21DC40)]
     unsafe fn strlen(self, s: *const c_char) -> usize;

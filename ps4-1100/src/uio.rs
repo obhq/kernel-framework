@@ -1,5 +1,5 @@
-use crate::thread::Thread;
 use crate::Kernel;
+use crate::thread::Thread;
 use core::ffi::c_int;
 use okf::uio::{IoVec, UioRw, UioSeg};
 
@@ -17,7 +17,7 @@ pub struct Uio {
 
 impl okf::uio::Uio<Kernel> for Uio {
     unsafe fn write(iov: *mut IoVec, td: *mut Thread) -> Option<Self> {
-        let res = (*iov).len;
+        let res = unsafe { (*iov).len };
 
         if res > Self::io_max() {
             return None;
@@ -35,7 +35,7 @@ impl okf::uio::Uio<Kernel> for Uio {
     }
 
     unsafe fn read(iov: *mut IoVec, off: usize, td: *mut Thread) -> Option<Self> {
-        let res = (*iov).len;
+        let res = unsafe { (*iov).len };
 
         if res > Self::io_max() {
             return None;

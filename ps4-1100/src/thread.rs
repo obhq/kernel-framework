@@ -1,5 +1,5 @@
-use crate::ucred::Ucred;
 use crate::Kernel;
+use crate::ucred::Ucred;
 
 /// Implementation of [`okf::thread::Thread`] for 11.00.
 #[repr(C)]

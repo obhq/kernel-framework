@@ -1,8 +1,7 @@
 [package]
-name = "okf-1100"
+name = "ps4-1100"
 version = "0.1.0"
-edition = "2021"
-links = "orbiskernel"
+edition = "2024"
 
 [dependencies]
 okf = { version = "0.1.0", path = "../" }

@@ -1,6 +1,6 @@
+use crate::Kernel;
 use crate::lock::Mtx;
 use crate::vnode::Vnode;
-use crate::Kernel;
 use core::ffi::{c_char, c_int};
 use core::mem::MaybeUninit;
 use core::num::NonZero;
@@ -73,11 +73,11 @@ pub struct FsOps {
 impl okf::mount::FsOps<Kernel> for FsOps {
     unsafe fn root(&self, mp: *mut Mount, flags: c_int) -> Result<*mut Vnode, NonZero<c_int>> {
         let mut vp = MaybeUninit::uninit();
-        let errno = (self.root)(mp, flags, vp.as_mut_ptr());
+        let errno = unsafe { (self.root)(mp, flags, vp.as_mut_ptr()) };
 
         match NonZero::new(errno) {
             Some(v) => Err(v),
-            None => Ok(vp.assume_init()),
+            None => Ok(unsafe { vp.assume_init() }),
         }
     }
 }

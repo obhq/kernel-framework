@@ -18,7 +18,7 @@ impl<K: Kernel> MtxLock<K> {
     /// # Safety
     /// `mtx` cannot be null.
     pub unsafe fn new(kern: K, mtx: *mut K::Mtx) -> Self {
-        kern.mtx_lock_flags(mtx, 0, c"".as_ptr(), 0);
+        unsafe { kern.mtx_lock_flags(mtx, 0, c"".as_ptr(), 0) };
         Self { kern, mtx }
     }
 }

@@ -25,11 +25,11 @@ impl okf::namei::ComponentName<crate::Kernel> for ComponentName {
             op,
             flags: 0,
             td,
-            cred: (*td).cred(),
+            cred: unsafe { (*td).cred() },
             lk,
             buf,
             name: buf,
-            len: k.strlen(buf) as _,
+            len: unsafe { k.strlen(buf) as _ },
             consume: 0,
         }
     }

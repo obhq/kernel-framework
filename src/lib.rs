@@ -239,7 +239,7 @@ pub trait Kernel: MappedKernel {
     /// - `so` cannot be null.
     /// - `td` cannot be null.
     unsafe fn solisten(self, so: *mut Self::Socket, backlog: c_int, td: *mut Self::Thread)
-        -> c_int;
+    -> c_int;
 
     /// # Safety
     /// `s` cannot be null and must point to a null-terminated string.
@@ -405,7 +405,7 @@ impl<T> MutableOps<T> {
     /// Behavior is undefined if write precondition is not upholds (e.g. the value required a lock
     /// before writing and the lock is not held by the calling thread).
     pub unsafe fn write(self, value: T) {
-        self.0.write(value);
+        unsafe { self.0.write(value) };
     }
 }
 
@@ -414,7 +414,7 @@ impl<T: Copy> MutableOps<T> {
     /// Behavior is undefined if read precondition is not upholds (e.g. the value required a lock
     /// before reading and the lock is not held by the calling thread).
     pub unsafe fn read(self) -> T {
-        self.0.read()
+        unsafe { self.0.read() }
     }
 }
 
@@ -463,7 +463,7 @@ impl<K: Kernel> Allocator<K> {
         // Allocate.
         let k = K::default();
         let t = k.var(K::M_TEMP);
-        let mem = k.malloc(size, t.ptr(), flags);
+        let mem = unsafe { k.malloc(size, t.ptr(), flags) };
 
         if mem.is_null() {
             return null_mut();
@@ -478,9 +478,9 @@ impl<K: Kernel> Allocator<K> {
         };
 
         // Store how many bytes have been shifted.
-        let mem = mem.add(adjust);
+        let mem = unsafe { mem.add(adjust) };
 
-        write_unaligned(mem.add(layout.size()).cast(), adjust);
+        unsafe { write_unaligned(mem.add(layout.size()).cast(), adjust) };
 
         mem
     }
@@ -494,23 +494,23 @@ impl<K: Kernel> Default for Allocator<K> {
 
 unsafe impl<K: Kernel> GlobalAlloc for Allocator<K> {
     unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
-        Self::alloc(layout, MallocFlags::WAITOK)
+        unsafe { Self::alloc(layout, MallocFlags::WAITOK) }
     }
 
     #[inline(never)]
     unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {
         // Get original address before alignment.
-        let adjusted: usize = read_unaligned(ptr.add(layout.size()).cast());
-        let ptr = ptr.sub(adjusted);
+        let adjusted: usize = unsafe { read_unaligned(ptr.add(layout.size()).cast()) };
+        let ptr = unsafe { ptr.sub(adjusted) };
 
         // Free the memory.
         let k = K::default();
         let t = k.var(K::M_TEMP);
 
-        k.free(ptr, t.ptr());
+        unsafe { k.free(ptr, t.ptr()) };
     }
 
     unsafe fn alloc_zeroed(&self, layout: Layout) -> *mut u8 {
-        Self::alloc(layout, MallocFlags::WAITOK | MallocFlags::ZERO)
+        unsafe { Self::alloc(layout, MallocFlags::WAITOK | MallocFlags::ZERO) }
     }
 }

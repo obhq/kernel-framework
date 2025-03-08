@@ -1,7 +1,7 @@
-use crate::fd::{openat, write_all, OpenFlags, AT_FDCWD};
+use crate::Kernel;
+use crate::fd::{AT_FDCWD, OpenFlags, openat, write_all};
 use crate::pcpu::Pcpu;
 use crate::uio::UioSeg;
-use crate::Kernel;
 use core::ffi::c_int;
 use core::fmt::Write;
 

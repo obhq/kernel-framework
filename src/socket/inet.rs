@@ -1,4 +1,4 @@
-use super::{SockAddr, AF_INET};
+use super::{AF_INET, SockAddr};
 use core::mem::{size_of, transmute};
 
 pub const INADDR_ANY: u32 = 0;

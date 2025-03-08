@@ -15,5 +15,5 @@ pub trait FsOps<K: Kernel>: Sized {
     /// # Safety
     /// `mp` cannot be null.
     unsafe fn root(&self, mp: *mut K::Mount, flags: c_int)
-        -> Result<*mut K::Vnode, NonZero<c_int>>;
+    -> Result<*mut K::Vnode, NonZero<c_int>>;
 }

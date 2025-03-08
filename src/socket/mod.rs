@@ -1,6 +1,6 @@
 pub use self::inet::*;
-use crate::thread::Thread;
 use crate::Kernel;
+use crate::thread::Thread;
 use core::ffi::{c_int, c_short, c_ushort};
 use core::num::NonZero;
 use core::ptr::null_mut;
@@ -21,7 +21,7 @@ pub unsafe fn bind<K: Kernel>(
     nam: &mut SockAddr,
     td: *mut K::Thread,
 ) -> Result<(), NonZero<c_int>> {
-    let errno = kern.sobind(so, nam, td);
+    let errno = unsafe { kern.sobind(so, nam, td) };
 
     match NonZero::new(errno) {
         Some(v) => Err(v),
@@ -38,7 +38,7 @@ pub unsafe fn listen<K: Kernel>(
     backlog: c_int,
     td: *mut K::Thread,
 ) -> Result<(), NonZero<c_int>> {
-    let errno = kern.solisten(so, backlog, td);
+    let errno = unsafe { kern.solisten(so, backlog, td) };
 
     match NonZero::new(errno) {
         Some(v) => Err(v),
@@ -75,8 +75,8 @@ impl<K: Kernel> OwnedSocket<K> {
         td: *mut K::Thread,
     ) -> Result<Self, NonZero<c_int>> {
         let mut sock = null_mut();
-        let cred = (*td).cred();
-        let errno = kern.socreate(dom, &mut sock, ty, proto, cred, td);
+        let cred = unsafe { (*td).cred() };
+        let errno = unsafe { kern.socreate(dom, &mut sock, ty, proto, cred, td) };
 
         match NonZero::new(errno) {
             Some(v) => Err(v),
