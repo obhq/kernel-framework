@@ -12,6 +12,6 @@ okf-macros = { version = "0.1.0", path = "macros" }
 
 [workspace]
 members = [
-    "kernel-1100",
-    "macros"
+    "macros",
+    "ps4-1100"
 ]

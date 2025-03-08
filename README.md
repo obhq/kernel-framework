@@ -4,7 +4,7 @@ Orbis Kernel Framework (OKF) is a Rust crate for developing an application that 
 
 ## Usage
 
-This crate currently not published to crates.io yet due to its API are still highly unstable. The recommended way to use it at this stage is via [Git](https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#specifying-dependencies-from-git-repositories) dependency like the following:
+This crate currently not published to crates.io yet due to its API are highly unstable. The recommended way to use it at this stage is via [Git](https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#specifying-dependencies-from-git-repositories) dependency like the following:
 
 ```toml
 [dependencies]

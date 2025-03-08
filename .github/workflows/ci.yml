@@ -11,7 +11,7 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout source
+    - name: Check out repository
       uses: actions/checkout@v4
     - name: Check Rust styles
       run: cargo fmt --check
