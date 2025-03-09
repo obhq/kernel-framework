@@ -96,7 +96,7 @@ pub trait Kernel: MappedKernel {
     fn get<O: Offset>(self, off: O) -> O::Ops {
         let addr = unsafe { self.addr().add(off.get()) };
 
-        <O::Ops as OffsetOps>::new(addr)
+        unsafe { <O::Ops as OffsetOps>::new(addr) }
     }
 
     /// # Safety
@@ -295,7 +295,9 @@ pub trait Offset: Copy {
 
 /// Contains possible operations on an item at the [`Offset`].
 pub trait OffsetOps: Copy {
-    fn new(addr: *const u8) -> Self;
+    /// # Safety
+    /// `addr` must be valid for this [`OffsetOps`] to operate on.
+    unsafe fn new(addr: *const u8) -> Self;
 }
 
 /// Offset of an immutable static value in the kernel.
@@ -338,7 +340,7 @@ impl<T> Offset for Static<T> {
 pub struct ImmutableOps<T>(*const T);
 
 impl<T> OffsetOps for ImmutableOps<T> {
-    fn new(addr: *const u8) -> Self {
+    unsafe fn new(addr: *const u8) -> Self {
         Self(addr.cast())
     }
 }
@@ -429,7 +431,7 @@ impl<T> Clone for MutableOps<T> {
 impl<T> Copy for MutableOps<T> {}
 
 impl<T> OffsetOps for MutableOps<T> {
-    fn new(addr: *const u8) -> Self {
+    unsafe fn new(addr: *const u8) -> Self {
         Self(addr.cast_mut().cast())
     }
 }
@@ -475,7 +477,8 @@ pub struct FunctionOps<T> {
 
 impl<T: KernelFn> FunctionOps<T> {
     pub fn as_ptr(self) -> T {
-        T::from_addr(self.addr)
+        // SAFETY: self.addr is guarantee to be valid by Function::new.
+        unsafe { T::from_addr(self.addr) }
     }
 }
 
@@ -488,7 +491,7 @@ impl<T> Clone for FunctionOps<T> {
 impl<T> Copy for FunctionOps<T> {}
 
 impl<T> OffsetOps for FunctionOps<T> {
-    fn new(addr: *const u8) -> Self {
+    unsafe fn new(addr: *const u8) -> Self {
         Self {
             addr,
             phantom: PhantomData,
@@ -498,11 +501,13 @@ impl<T> OffsetOps for FunctionOps<T> {
 
 /// Provides method to cast kernel address into a function pointer.
 pub trait KernelFn: Copy {
-    fn from_addr(addr: *const u8) -> Self;
+    /// # Safety
+    /// `addr` must be the first instruction of this function.
+    unsafe fn from_addr(addr: *const u8) -> Self;
 }
 
 impl<R, A1> KernelFn for extern "C" fn(A1, ...) -> R {
-    fn from_addr(addr: *const u8) -> Self {
+    unsafe fn from_addr(addr: *const u8) -> Self {
         unsafe { transmute(addr) }
     }
 }
