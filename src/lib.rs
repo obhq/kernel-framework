@@ -16,6 +16,7 @@ use self::vnode::{Vnode, VnodeOp, VopLookup, VopRead, VopReadDir, VopUnlock, Vop
 use core::alloc::{GlobalAlloc, Layout};
 use core::ffi::{c_char, c_int};
 use core::marker::PhantomData;
+use core::mem::transmute;
 use core::num::NonZero;
 use core::ops::Deref;
 use core::ptr::{null_mut, read_unaligned, write_unaligned};
@@ -62,6 +63,7 @@ pub trait Kernel: MappedKernel {
     const MOUNTLIST: StaticMut<TailQueue<Self::Mount>>;
     const MOUNTLIST_MTX: StaticMut<Self::Mtx>;
     const NOCPU: u32;
+    const PANIC: Function<extern "C" fn(*const c_char, ...) -> !>;
     const VDIR: c_int;
     const VOP_LOOKUP: StaticMut<Self::VnodeOp>;
     const VOP_READ: StaticMut<Self::VnodeOp>;
@@ -91,10 +93,10 @@ pub trait Kernel: MappedKernel {
     type VopUnlock: VopUnlock;
     type VopVector: VopVector;
 
-    fn var<O: StaticOff>(self, off: O) -> O::Ops {
-        let value = unsafe { self.addr().add(off.value()) };
+    fn get<O: Offset>(self, off: O) -> O::Ops {
+        let addr = unsafe { self.addr().add(off.get()) };
 
-        <O::Ops as StaticOps>::new(value)
+        <O::Ops as OffsetOps>::new(addr)
     }
 
     /// # Safety
@@ -284,16 +286,16 @@ pub trait MappedKernel: Default + Sized + Copy + Send + Sync + 'static {
     fn addr(self) -> *const u8;
 }
 
-/// Offset of a static value in the kernel.
-pub trait StaticOff: Copy {
-    type Ops: StaticOps;
+/// Offset of something in the kernel.
+pub trait Offset: Copy {
+    type Ops: OffsetOps;
 
-    fn value(self) -> usize;
+    fn get(self) -> usize;
 }
 
-/// Operations on a static value.
-pub trait StaticOps: Copy {
-    fn new(value: *const u8) -> Self;
+/// Contains possible operations on an item at the [`Offset`].
+pub trait OffsetOps: Copy {
+    fn new(addr: *const u8) -> Self;
 }
 
 /// Offset of an immutable static value in the kernel.
@@ -324,20 +326,20 @@ impl<T> Clone for Static<T> {
 
 impl<T> Copy for Static<T> {}
 
-impl<T> StaticOff for Static<T> {
+impl<T> Offset for Static<T> {
     type Ops = ImmutableOps<T>;
 
-    fn value(self) -> usize {
+    fn get(self) -> usize {
         self.off
     }
 }
 
-/// Implementation of [`StaticOps`] for [`Static`].
+/// Implementation of [`OffsetOps`] for [`Static`].
 pub struct ImmutableOps<T>(*const T);
 
-impl<T> StaticOps for ImmutableOps<T> {
-    fn new(value: *const u8) -> Self {
-        Self(value.cast())
+impl<T> OffsetOps for ImmutableOps<T> {
+    fn new(addr: *const u8) -> Self {
+        Self(addr.cast())
     }
 }
 
@@ -385,10 +387,10 @@ impl<T> Clone for StaticMut<T> {
 
 impl<T> Copy for StaticMut<T> {}
 
-impl<T> StaticOff for StaticMut<T> {
+impl<T> Offset for StaticMut<T> {
     type Ops = MutableOps<T>;
 
-    fn value(self) -> usize {
+    fn get(self) -> usize {
         self.off
     }
 }
@@ -397,7 +399,7 @@ impl<T> StaticOff for StaticMut<T> {
 pub struct MutableOps<T>(*mut T);
 
 impl<T> MutableOps<T> {
-    pub fn ptr(self) -> *mut T {
+    pub fn as_mut_ptr(self) -> *mut T {
         self.0
     }
 
@@ -426,9 +428,82 @@ impl<T> Clone for MutableOps<T> {
 
 impl<T> Copy for MutableOps<T> {}
 
-impl<T> StaticOps for MutableOps<T> {
-    fn new(value: *const u8) -> Self {
-        Self(value as _)
+impl<T> OffsetOps for MutableOps<T> {
+    fn new(addr: *const u8) -> Self {
+        Self(addr.cast_mut().cast())
+    }
+}
+
+/// Offset of a function in the kernel.
+pub struct Function<T: KernelFn> {
+    off: usize,
+    phantom: PhantomData<T>,
+}
+
+impl<T: KernelFn> Function<T> {
+    /// # Safety
+    /// Behavior is undefined if `off` is not valid.
+    pub const unsafe fn new(off: usize) -> Self {
+        Self {
+            off,
+            phantom: PhantomData,
+        }
+    }
+}
+
+impl<T: KernelFn> Clone for Function<T> {
+    fn clone(&self) -> Self {
+        *self
+    }
+}
+
+impl<T: KernelFn> Copy for Function<T> {}
+
+impl<T: KernelFn> Offset for Function<T> {
+    type Ops = ImmutableOps<T>;
+
+    fn get(self) -> usize {
+        self.off
+    }
+}
+
+/// Implementation of [`OffsetOps`] for [`Function`].
+pub struct FunctionOps<T> {
+    addr: *const u8,
+    phantom: PhantomData<T>,
+}
+
+impl<T: KernelFn> FunctionOps<T> {
+    pub fn as_ptr(self) -> T {
+        T::from_addr(self.addr)
+    }
+}
+
+impl<T> Clone for FunctionOps<T> {
+    fn clone(&self) -> Self {
+        *self
+    }
+}
+
+impl<T> Copy for FunctionOps<T> {}
+
+impl<T> OffsetOps for FunctionOps<T> {
+    fn new(addr: *const u8) -> Self {
+        Self {
+            addr,
+            phantom: PhantomData,
+        }
+    }
+}
+
+/// Provides method to cast kernel address into a function pointer.
+pub trait KernelFn: Copy {
+    fn from_addr(addr: *const u8) -> Self;
+}
+
+impl<R, A1> KernelFn for extern "C" fn(A1, ...) -> R {
+    fn from_addr(addr: *const u8) -> Self {
+        unsafe { transmute(addr) }
     }
 }
 
@@ -462,8 +537,8 @@ impl<K: Kernel> Allocator<K> {
 
         // Allocate.
         let k = K::default();
-        let t = k.var(K::M_TEMP);
-        let mem = unsafe { k.malloc(size, t.ptr(), flags) };
+        let t = k.get(K::M_TEMP);
+        let mem = unsafe { k.malloc(size, t.as_mut_ptr(), flags) };
 
         if mem.is_null() {
             return null_mut();
@@ -505,9 +580,9 @@ unsafe impl<K: Kernel> GlobalAlloc for Allocator<K> {
 
         // Free the memory.
         let k = K::default();
-        let t = k.var(K::M_TEMP);
+        let t = k.get(K::M_TEMP);
 
-        unsafe { k.free(ptr, t.ptr()) };
+        unsafe { k.free(ptr, t.as_mut_ptr()) };
     }
 
     unsafe fn alloc_zeroed(&self, layout: Layout) -> *mut u8 {

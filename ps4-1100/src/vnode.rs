@@ -63,7 +63,7 @@ impl okf::vnode::VopRead<crate::Kernel> for VopRead {
         cred: *mut Ucred,
     ) -> Self {
         Self {
-            desc: k.var(crate::Kernel::VOP_READ).ptr(),
+            desc: k.get(crate::Kernel::VOP_READ).as_mut_ptr(),
             vp,
             uio,
             flags,
@@ -95,7 +95,7 @@ impl okf::vnode::VopReadDir<crate::Kernel> for VopReadDir {
         cookies: *mut *mut u64,
     ) -> Self {
         Self {
-            desc: k.var(crate::Kernel::VOP_READDIR).ptr(),
+            desc: k.get(crate::Kernel::VOP_READDIR).as_mut_ptr(),
             vp,
             uio,
             cred,
@@ -123,7 +123,7 @@ impl okf::vnode::VopLookup<crate::Kernel> for VopLookup {
         cn: *mut ComponentName,
     ) -> Self {
         Self {
-            desc: k.var(crate::Kernel::VOP_LOOKUP).ptr(),
+            desc: k.get(crate::Kernel::VOP_LOOKUP).as_mut_ptr(),
             vp,
             out,
             cn,

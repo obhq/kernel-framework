@@ -18,7 +18,7 @@ use okf::malloc::MallocFlags;
 use okf::queue::TailQueue;
 use okf::socket::SockAddr;
 use okf::uio::UioSeg;
-use okf::{MappedKernel, StaticMut, offset, panic_handler};
+use okf::{Function, MappedKernel, StaticMut, offset, panic_handler};
 
 mod file;
 mod lock;
@@ -54,6 +54,8 @@ impl okf::Kernel for Kernel {
     #[offset(0x22D0F10)]
     const MOUNTLIST_MTX: StaticMut<Self::Mtx>;
     const NOCPU: u32 = 0xff;
+    #[offset(0x1987C0)]
+    const PANIC: Function<extern "C" fn(*const c_char, ...) -> !>;
     const VDIR: c_int = 2;
     #[offset(0x15308F0)]
     const VOP_LOOKUP: StaticMut<Self::VnodeOp>;

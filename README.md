@@ -14,7 +14,7 @@ okf = { git = "https://github.com/obhq/kernel-framework.git" }
 okf-1100 = { git = "https://github.com/obhq/kernel-framework.git" }
 ```
 
-Please note that all examples below was designed to use with crates.io so you may need to adjust it.
+Please note that all examples below was designed to use with crates.io so you may need to adjust it. Beware that each commit can introduce some breaking changes at anytime so you should commit a `Cargo.lock` or locked to a specific commit.
 
 ## Develop a kernel application
 
