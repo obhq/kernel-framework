@@ -29,6 +29,7 @@ pub mod malloc;
 pub mod mount;
 pub mod namei;
 pub mod notification;
+pub mod panic;
 pub mod pcpu;
 pub mod queue;
 pub mod socket;
@@ -36,14 +37,6 @@ pub mod thread;
 pub mod ucred;
 pub mod uio;
 pub mod vnode;
-
-#[cfg(fw = "1100")]
-#[macro_export]
-macro_rules! kernel {
-    () => {
-        okf_1100::Kernel
-    };
-}
 
 /// Provides methods to access the PS4 kernel for a specific version.
 ///
@@ -63,7 +56,7 @@ pub trait Kernel: MappedKernel {
     const MOUNTLIST: StaticMut<TailQueue<Self::Mount>>;
     const MOUNTLIST_MTX: StaticMut<Self::Mtx>;
     const NOCPU: u32;
-    const PANIC: Function<extern "C" fn(*const c_char, ...) -> !>;
+    const PANIC: Function<unsafe extern "C" fn(*const c_char, ...) -> !>;
     const VDIR: c_int;
     const VOP_LOOKUP: StaticMut<Self::VnodeOp>;
     const VOP_READ: StaticMut<Self::VnodeOp>;
@@ -397,7 +390,9 @@ impl<T> Offset for StaticMut<T> {
     }
 }
 
-/// Implementation of [`StaticOps`] for [`StaticMut`].
+/// Implementation of [`OffsetOps`] for [`StaticMut`].
+///
+/// This type does not implement [DerefMut](core::ops::DerefMut) by design.
 pub struct MutableOps<T>(*mut T);
 
 impl<T> MutableOps<T> {
@@ -462,7 +457,7 @@ impl<T: KernelFn> Clone for Function<T> {
 impl<T: KernelFn> Copy for Function<T> {}
 
 impl<T: KernelFn> Offset for Function<T> {
-    type Ops = ImmutableOps<T>;
+    type Ops = FunctionOps<T>;
 
     fn get(self) -> usize {
         self.off
@@ -506,7 +501,7 @@ pub trait KernelFn: Copy {
     unsafe fn from_addr(addr: *const u8) -> Self;
 }
 
-impl<R, A1> KernelFn for extern "C" fn(A1, ...) -> R {
+impl<R, A1> KernelFn for unsafe extern "C" fn(A1, ...) -> R {
     unsafe fn from_addr(addr: *const u8) -> Self {
         unsafe { transmute(addr) }
     }
