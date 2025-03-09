@@ -2,7 +2,7 @@ use proc_macro2::TokenStream;
 use quote::ToTokens;
 use syn::punctuated::Punctuated;
 use syn::{
-    parse_quote, Error, FnArg, LitInt, Pat, PatType, Token, TraitItem, TraitItemConst, TraitItemFn,
+    Error, FnArg, LitInt, Pat, PatType, Token, TraitItem, TraitItemConst, TraitItemFn, parse_quote,
 };
 
 pub fn transform(args: LitInt, item: TraitItem) -> syn::Result<TokenStream> {

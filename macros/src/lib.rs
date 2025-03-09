@@ -1,5 +1,5 @@
 use proc_macro::TokenStream;
-use syn::{parse_macro_input, Error, ItemStruct, LitInt, TraitItem};
+use syn::{Error, ItemStruct, LitInt, TraitItem, parse_macro_input};
 
 mod derive;
 mod offset;
